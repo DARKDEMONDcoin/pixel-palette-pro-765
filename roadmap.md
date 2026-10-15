@@ -11,6 +11,6 @@
 - [x] Phase 6 — Wizard steps 5–8, sequence engine (10-min sender), approvals, reply classification, SQL → Freshsales + Slack
 - [ ] Phase 6b — Automatic email sending and reply capture — blocked: Gmail/Outlook sign-in apps not configured (replies logged by hand meanwhile)
 - [x] Phase 7 — Inbox and Leads database
-- [ ] Phase 8 — Analytics and Dashboard
+- [x] Phase 8 — Analytics and Dashboard (cost per SQL not tracked)
 - [ ] Phase 9 — Settings modules
 - [ ] Later — brand logo upload, OCR for scanned PDFs, dark theme, 2FA, demo workspace
