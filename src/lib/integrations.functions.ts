@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type Provider = "apollo" | "freshsales" | "slack";
-const PROVIDERS: Provider[] = ["apollo", "freshsales", "slack"];
+export type Provider = "apollo" | "freshsales" | "slack" | "llm" | "phantombuster" | "vapi";
+const PROVIDERS: Provider[] = ["apollo", "freshsales", "slack", "llm", "phantombuster", "vapi"];
 
 type Input = { workspaceId: string; provider: Provider; secret?: string | undefined; config?: Record<string, string> | undefined };
 
@@ -28,6 +28,21 @@ async function runTest(provider: Provider, secret: string, config: Record<string
       const domain = (config["domain"] ?? "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
       if (!/^[a-z0-9.-]+\.(myfreshworks|freshsales)\.(com|io)$/i.test(domain)) return "Enter your Freshsales domain, e.g. yourcompany.myfreshworks.com";
       res = await fetch(`https://${domain}/crm/sales/api/selector/owners`, { headers: { Authorization: `Token token=${secret}` } });
+    } else if (provider === "llm") {
+      const p = config["provider"] ?? "lovable";
+      if (!config["research_model"] || !config["scoring_model"]) return "Choose both a research/copywriting model and a scoring model";
+      if (p === "lovable") return null;
+      if (!secret) return "Enter the API key for your own provider";
+      if (p === "openai") res = await fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${secret}` } });
+      else if (p === "anthropic") res = await fetch("https://api.anthropic.com/v1/models", { headers: { "x-api-key": secret, "anthropic-version": "2023-06-01" } });
+      else if (p === "gemini") res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(secret)}`);
+      else return "Unknown AI provider";
+    } else if (provider === "phantombuster") {
+      if (!config["phantom_id"]) return "Enter the LinkedIn automation phantom ID";
+      res = await fetch(`https://api.phantombuster.com/api/v2/agents/fetch?id=${encodeURIComponent(config["phantom_id"])}`, { headers: { "X-Phantombuster-Key": secret } });
+    } else if (provider === "vapi") {
+      if (!config["assistant_en"] && !config["assistant_ar"]) return "Enter at least one assistant ID (English or Arabic)";
+      res = await fetch("https://api.vapi.ai/assistant?limit=1", { headers: { Authorization: `Bearer ${secret}` } });
     } else {
       if (!/^https:\/\/hooks\.slack\.com\//.test(secret)) return "Slack webhook URL must start with https://hooks.slack.com/";
       res = await fetch(secret, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "✅ Outreach AI connection test" }) });
@@ -60,14 +75,17 @@ export const saveIntegration = createServerFn({ method: "POST" })
       const { data: s } = await supabaseAdmin.from("integration_secrets").select("secret").eq("integration_id", existing.id).maybeSingle();
       secret = s?.secret;
     }
-    if (!secret) throw new Error("Enter the API key first");
-    const err = await runTest(data.provider, secret, data.config ?? {});
+    const builtin = data.provider === "llm" && (data.config?.["provider"] ?? "lovable") === "lovable";
+    if (builtin) secret = "";
+    else if (!secret) throw new Error("Enter the API key first");
+    const err = await runTest(data.provider, secret ?? "", data.config ?? {});
     const { data: row, error } = await supabaseAdmin.from("integrations").upsert(
       { workspace_id: data.workspaceId, provider: data.provider, config: data.config ?? {}, status: err ? "error" : "connected", last_error: err, last_tested_at: new Date().toISOString(), updated_at: new Date().toISOString() },
       { onConflict: "workspace_id,provider" },
     ).select("id").single();
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from("integration_secrets").upsert({ integration_id: row.id, secret, updated_at: new Date().toISOString() });
+    if (builtin) await supabaseAdmin.from("integration_secrets").delete().eq("integration_id", row.id);
+    else await supabaseAdmin.from("integration_secrets").upsert({ integration_id: row.id, secret: secret!, updated_at: new Date().toISOString() });
     return { ok: !err, error: err };
   });
 
