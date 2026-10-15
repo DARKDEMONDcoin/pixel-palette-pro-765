@@ -42,15 +42,15 @@ export function Compliance() {
   async function add() {
     const v = value.trim().toLowerCase().replace(/^@/, "");
     if (!v) return;
-    if (kind === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return toast.error("Enter a valid email");
-    if (kind === "domain" && !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(v)) return toast.error("Enter a domain like example.com");
+    if (kind === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return void toast.error("Enter a valid email");
+    if (kind === "domain" && !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(v)) return void toast.error("Enter a domain like example.com");
     const { error } = await supabase.from("suppression_list").insert({ workspace_id: ws, value: v, kind, reason: "Added in Settings", created_by: user.id, organization_id: org === "all" ? null : org });
-    if (error) return err(error);
+    if (error) return void err(error);
     setValue(""); toast.success("Added"); qc.invalidateQueries({ queryKey: ["suppression-full"] }); qc.invalidateQueries({ queryKey: ["suppression"] });
   }
   async function remove(id: string) {
     const { error } = await supabase.from("suppression_list").delete().eq("id", id);
-    if (error) return err(error);
+    if (error) return void err(error);
     qc.invalidateQueries({ queryKey: ["suppression-full"] });
   }
   async function erase() {
@@ -176,23 +176,23 @@ export function ApiWebhooks() {
   const keys = useQuery({ queryKey: ["api-keys", ws], queryFn: async () => (await supabase.from("api_keys").select("*").eq("workspace_id", ws).order("created_at", { ascending: false })).data ?? [] });
   const hooks = useQuery({ queryKey: ["webhooks", ws], queryFn: async () => (await supabase.from("webhooks").select("id,url,events,active,last_status,last_error,last_sent_at").eq("workspace_id", ws).order("created_at")).data ?? [] });
   async function createKey() {
-    if (!keyName.trim()) return toast.error("Name the key");
+    if (!keyName.trim()) return void toast.error("Name the key");
     const raw = `oai_${randomToken(24)}`;
     const { error } = await supabase.from("api_keys").insert({ workspace_id: ws, name: keyName.trim(), prefix: raw.slice(0, 10), key_hash: await sha256(raw), created_by: user.id });
-    if (error) return err(error);
+    if (error) return void err(error);
     setNewKey(raw); setKeyName(""); qc.invalidateQueries({ queryKey: ["api-keys"] });
   }
-  async function revoke(id: string) { const { error } = await supabase.from("api_keys").update({ revoked_at: new Date().toISOString() }).eq("id", id); if (error) return err(error); qc.invalidateQueries({ queryKey: ["api-keys"] }); }
+  async function revoke(id: string) { const { error } = await supabase.from("api_keys").update({ revoked_at: new Date().toISOString() }).eq("id", id); if (error) return void err(error); qc.invalidateQueries({ queryKey: ["api-keys"] }); }
   async function addHook() {
-    if (!/^https:\/\/.+/.test(url.trim())) return toast.error("Use an https:// URL");
-    if (!events.length) return toast.error("Pick at least one event");
+    if (!/^https:\/\/.+/.test(url.trim())) return void toast.error("Use an https:// URL");
+    if (!events.length) return void toast.error("Pick at least one event");
     const secret = `whsec_${randomToken(24)}`;
     const { error } = await supabase.from("webhooks").insert({ workspace_id: ws, url: url.trim(), events, secret, created_by: user.id });
-    if (error) return err(error);
+    if (error) return void err(error);
     setNewSecret(secret); setUrl(""); qc.invalidateQueries({ queryKey: ["webhooks"] });
   }
-  async function patchHook(id: string, patch: { active?: boolean }) { const { error } = await supabase.from("webhooks").update(patch).eq("id", id); if (error) return err(error); qc.invalidateQueries({ queryKey: ["webhooks"] }); }
-  async function delHook(id: string) { const { error } = await supabase.from("webhooks").delete().eq("id", id); if (error) return err(error); qc.invalidateQueries({ queryKey: ["webhooks"] }); }
+  async function patchHook(id: string, patch: { active?: boolean }) { const { error } = await supabase.from("webhooks").update(patch).eq("id", id); if (error) return void err(error); qc.invalidateQueries({ queryKey: ["webhooks"] }); }
+  async function delHook(id: string) { const { error } = await supabase.from("webhooks").delete().eq("id", id); if (error) return void err(error); qc.invalidateQueries({ queryKey: ["webhooks"] }); }
   const copy = (s: string) => { void navigator.clipboard.writeText(s); toast.success("Copied"); };
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   return (<>
@@ -232,7 +232,7 @@ export function Notifications() {
   const p = q.data ?? { sql_found: true, mailbox_error: true, campaign_finished: true, approvals_waiting: true, email_enabled: false };
   async function set(k: PrefKey, v: boolean) {
     const { error } = await supabase.from("notification_prefs").upsert({ ...p, user_id: user.id, workspace_id: ws, [k]: v });
-    if (error) return err(error);
+    if (error) return void err(error);
     qc.invalidateQueries({ queryKey: ["notif-prefs"] });
   }
   if (q.isLoading) return <Skeleton className="mt-4 h-40" />;
