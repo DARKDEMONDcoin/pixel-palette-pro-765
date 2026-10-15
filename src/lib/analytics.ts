@@ -55,7 +55,7 @@ export function useAnalytics(ws: string | undefined, days: number) {
         if (m.sent_at) day(m.sent_at).sent++;
       }
       for (const r of reps) {
-        bump(r.campaign_id, (s) => { s.replies++; if (r.classification === "interested" || r.is_sql) s.interested++; if (r.is_sql) s.sqls++; if (r.classification === "unsubscribe") s.unsub++; }, variantOfLead.get(r.campaign_lead_id));
+        bump(r.campaign_id, (s) => { s.replies++; if (r.classification === "interested" || r.classification === "meeting_request" || r.is_sql) s.interested++; if (r.is_sql) s.sqls++; if (r.classification === "unsubscribe") s.unsub++; }, variantOfLead.get(r.campaign_lead_id));
         day(r.created_at).replies++;
       }
       const series = Array.from({ length: days }, (_, i) => {
