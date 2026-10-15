@@ -46,7 +46,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function Profile() {
   const { user } = useWorkspace();
-  const [name, setName] = useState((user.user_metadata?.full_name as string) ?? "");
+  const [name, setName] = useState((user.user_metadata?.["full_name"] as string) ?? "");
   async function save() {
     const { error } = await supabase.from("profiles").update({ full_name: name }).eq("id", user.id);
     await supabase.auth.updateUser({ data: { full_name: name } });
@@ -69,7 +69,7 @@ function WorkspaceTab() {
   if (!current) return null;
   async function save() {
     const { error } = await supabase.from("workspaces").update({ name }).eq("id", current!.workspace_id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Workspace updated");
     refetch();
   }
@@ -110,14 +110,14 @@ function Team() {
   async function invite(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("workspace_invitations").insert({ workspace_id: ws, email: email.trim().toLowerCase(), role, invited_by: user.id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Invitation saved for ${email}`);
     setEmail("");
     qc.invalidateQueries({ queryKey: ["invites", ws] });
   }
   async function updateMember(id: string, patch: { role?: AppRole; active?: boolean }) {
     const { error } = await supabase.from("workspace_members").update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["members", ws] });
   }
   async function revoke(id: string) {

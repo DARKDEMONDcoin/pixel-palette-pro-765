@@ -26,12 +26,12 @@ const steps = [
 
 function Dashboard() {
   const { user, current } = useWorkspace();
-  const name = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
+  const name = (user.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0];
   return (
     <div className="space-y-6">
       <PageHeader
         title={`Welcome${name ? `, ${name}` : ""}`}
-        description={current ? `Workspace: ${current.workspace.name}` : undefined}
+        description={current ? `Workspace: ${current.workspace.name}` : ""}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" asChild><Link to="/agents">New agent</Link></Button>

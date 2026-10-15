@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Search = { redirect?: string };
+type Search = { redirect?: string | undefined };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): Search => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined,
   }),
   head: () => ({
     meta: [

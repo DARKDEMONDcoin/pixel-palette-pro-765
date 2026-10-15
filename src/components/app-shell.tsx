@@ -130,7 +130,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+export function PageHeader({ title, description, actions }: { title: string; description?: string | undefined; actions?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
