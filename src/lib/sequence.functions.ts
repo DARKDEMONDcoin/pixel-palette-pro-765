@@ -101,7 +101,8 @@ export const launchCampaign = createServerFn({ method: "POST" })
     for (const [, ms] of ready) for (const m of ms)
       await admin.from("messages").update({ status: "scheduled", scheduled_for: new Date(now + (offsets.get(m.step_id) ?? 0) * 86400000).toISOString() }).eq("id", m.id);
     await admin.from("campaign_leads").update({ status: "active" }).in("id", ready.map(([id]) => id));
-    await admin.from("campaigns").update({ status: "active", wizard_step: 8, updated_at: new Date().toISOString() }).eq("id", campaign.id);
+    const { error: upErr } = await admin.from("campaigns").update({ status: "active", wizard_step: 8, updated_at: new Date().toISOString() }).eq("id", campaign.id);
+    if (upErr) throw new Error(`Couldn't activate the campaign: ${upErr.message}`);
     return { launched: ready.length, skipped: byLead.size - ready.length };
   });
 
@@ -113,7 +114,8 @@ export const setCampaignStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { admin, campaign } = await assertEdit(context.supabase, data.campaignId);
     if (campaign.status === "draft") throw new Error("Launch the campaign first");
-    await admin.from("campaigns").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", campaign.id);
+    const { error: stErr } = await admin.from("campaigns").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", campaign.id);
+    if (stErr) throw new Error(stErr.message);
     if (data.status === "completed") await admin.from("messages").update({ status: "skipped", error: "Campaign completed" }).eq("campaign_id", campaign.id).in("status", ["scheduled", "waiting"]);
     return { ok: true };
   });
