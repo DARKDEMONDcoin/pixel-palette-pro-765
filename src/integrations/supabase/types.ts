@@ -204,6 +204,54 @@ export type Database = {
           },
         ]
       }
+      campaign_steps: {
+        Row: {
+          campaign_id: string
+          channel: string
+          created_at: string
+          delay_days: number
+          id: string
+          instructions: string | null
+          step_order: number
+          workspace_id: string
+        }
+        Insert: {
+          campaign_id: string
+          channel: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          instructions?: string | null
+          step_order: number
+          workspace_id: string
+        }
+        Update: {
+          campaign_id?: string
+          channel?: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          instructions?: string | null
+          step_order?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_steps_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_steps_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           ab_testing: boolean
@@ -547,6 +595,95 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          body: string
+          campaign_id: string
+          campaign_lead_id: string
+          channel: string
+          created_at: string
+          error: string | null
+          id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          step_id: string
+          step_order: number
+          subject: string | null
+          variant: string
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          body: string
+          campaign_id: string
+          campaign_lead_id: string
+          channel: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          step_id: string
+          step_order: number
+          subject?: string | null
+          variant?: string
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          body?: string
+          campaign_id?: string
+          campaign_lead_id?: string
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          step_id?: string
+          step_order?: number
+          subject?: string | null
+          variant?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_campaign_lead_id_fkey"
+            columns: ["campaign_lead_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_access: {
         Row: {
           created_at: string
@@ -664,6 +801,76 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      replies: {
+        Row: {
+          body: string
+          campaign_id: string
+          campaign_lead_id: string
+          channel: string
+          classification: string | null
+          created_at: string
+          created_by: string | null
+          crm_error: string | null
+          freshsales_id: string | null
+          id: string
+          is_sql: boolean
+          summary: string | null
+          workspace_id: string
+        }
+        Insert: {
+          body: string
+          campaign_id: string
+          campaign_lead_id: string
+          channel?: string
+          classification?: string | null
+          created_at?: string
+          created_by?: string | null
+          crm_error?: string | null
+          freshsales_id?: string | null
+          id?: string
+          is_sql?: boolean
+          summary?: string | null
+          workspace_id: string
+        }
+        Update: {
+          body?: string
+          campaign_id?: string
+          campaign_lead_id?: string
+          channel?: string
+          classification?: string | null
+          created_at?: string
+          created_by?: string | null
+          crm_error?: string | null
+          freshsales_id?: string | null
+          id?: string
+          is_sql?: boolean
+          summary?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replies_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replies_campaign_lead_id_fkey"
+            columns: ["campaign_lead_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replies_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppression_list: {
         Row: {
