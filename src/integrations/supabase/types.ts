@@ -14,6 +14,214 @@ export type Database = {
   }
   public: {
     Tables: {
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          doc_type: string
+          document_id: string
+          embedding: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          doc_type: string
+          document_id: string
+          embedding: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          doc_type?: string
+          document_id?: string
+          embedding?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          chunk_count: number
+          created_at: string
+          doc_type: string
+          error: string | null
+          file_name: string
+          id: string
+          indexed_at: string | null
+          mime_type: string | null
+          organization_id: string
+          size_bytes: number
+          status: string
+          storage_path: string
+          uploaded_by: string
+          workspace_id: string
+        }
+        Insert: {
+          chunk_count?: number
+          created_at?: string
+          doc_type: string
+          error?: string | null
+          file_name: string
+          id?: string
+          indexed_at?: string | null
+          mime_type?: string | null
+          organization_id: string
+          size_bytes?: number
+          status?: string
+          storage_path: string
+          uploaded_by?: string
+          workspace_id: string
+        }
+        Update: {
+          chunk_count?: number
+          created_at?: string
+          doc_type?: string
+          error?: string | null
+          file_name?: string
+          id?: string
+          indexed_at?: string | null
+          mime_type?: string | null
+          organization_id?: string
+          size_bytes?: number
+          status?: string
+          storage_path?: string
+          uploaded_by?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_access: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          industry: string | null
+          languages: string[]
+          logo_path: string | null
+          name: string
+          signature: string | null
+          summary: Json | null
+          summary_approved_at: string | null
+          summary_approved_by: string | null
+          summary_status: string
+          website: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          languages?: string[]
+          logo_path?: string | null
+          name: string
+          signature?: string | null
+          summary?: Json | null
+          summary_approved_at?: string | null
+          summary_approved_by?: string | null
+          summary_status?: string
+          website?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          languages?: string[]
+          logo_path?: string | null
+          name?: string
+          signature?: string | null
+          summary?: Json | null
+          summary_approved_at?: string | null
+          summary_approved_by?: string | null
+          summary_status?: string
+          website?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -146,12 +354,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_org: { Args: { _org: string }; Returns: boolean }
+      can_edit_org: { Args: { _org: string }; Returns: boolean }
       create_workspace: { Args: { _name: string }; Returns: string }
       has_ws_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"]; _ws: string }
         Returns: boolean
       }
       is_member: { Args: { _ws: string }; Returns: boolean }
+      match_org_chunks: {
+        Args: { _org: string; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          doc_type: string
+          document_id: string
+          id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "standard" | "viewer"
