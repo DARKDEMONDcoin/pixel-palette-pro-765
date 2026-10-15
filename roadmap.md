@@ -6,8 +6,9 @@
 - [ ] Phase 3b — Real Gmail/Outlook mailbox sign-in per agent — blocked: workspace Google/Microsoft OAuth app (App User Connector client) not configured
 - [x] Phase 4 — Integrations page (Apollo, Freshsales, Slack tests)
 - [ ] Phase 4b — LinkedIn and calling providers — blocked: provider not chosen
-- [ ] Phase 5 — Campaign wizard (sources, qualification, research)
-- [ ] Phase 6 — Sequence engine, approvals, reply classification, SQL → Freshsales
+- [x] Phase 5 — Campaign wizard steps 1–4 (basics, sources, qualification, research)
+- [ ] Phase 5b — Google Sheet lead source — blocked: workspace Google OAuth app not configured
+- [ ] Phase 6 — Wizard steps 5–8 (sequence, copy, approval, launch), sequence engine, approvals, reply classification, SQL → Freshsales
 - [ ] Phase 7 — Inbox and Leads database
 - [ ] Phase 8 — Analytics and Dashboard
 - [ ] Phase 9 — Settings modules
