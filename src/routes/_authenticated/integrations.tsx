@@ -55,7 +55,7 @@ function IntegrationsPage() {
   );
 }
 
-function Status({ status }: { status?: string }) {
+function Status({ status }: { status?: string | undefined }) {
   const map: Record<string, [string, string]> = {
     connected: ["Connected", "bg-success/15 text-success"],
     error: ["Error", "bg-destructive/15 text-destructive"],
@@ -64,7 +64,7 @@ function Status({ status }: { status?: string }) {
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{label}</span>;
 }
 
-function Shell({ icon: Icon, name, desc, status, children }: { icon: typeof Database; name: string; desc: string; status?: string; children: React.ReactNode }) {
+function Shell({ icon: Icon, name, desc, status, children }: { icon: typeof Database; name: string; desc: string; status?: string | undefined; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl bg-card p-6 shadow-soft">
       <div className="flex items-start gap-3">
@@ -81,7 +81,7 @@ function StaticCard(p: { icon: typeof Database; name: string; desc: string; chil
   return <Shell {...p}><p className="text-sm text-muted-foreground">{p.children}</p></Shell>;
 }
 
-function IntegrationCard({ def, ws, row, canEdit }: { def: (typeof defs)[number]; ws: string; row?: Row; canEdit: boolean }) {
+function IntegrationCard({ def, ws, row, canEdit }: { def: (typeof defs)[number]; ws: string; row?: Row | undefined; canEdit: boolean }) {
   const qc = useQueryClient();
   const save = useServerFn(saveIntegration);
   const disconnect = useServerFn(disconnectIntegration);
