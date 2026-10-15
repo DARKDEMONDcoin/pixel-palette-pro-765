@@ -121,7 +121,7 @@ function Documents({ orgId, canEdit }: { orgId: string; canEdit: boolean }) {
       const file = list[i]!;
       setProgress(`Processing ${i + 1} of ${list.length}: ${file.name}`);
       const path = `${orgId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
-      const up = await supabase.storage.from("org-files").upload(path, file, { contentType: file.type || undefined });
+      const up = await supabase.storage.from("org-files").upload(path, file, file.type ? { contentType: file.type } : {});
       if (up.error) { toast.error(`${file.name}: ${up.error.message}`); continue; }
       const { data: doc, error } = await supabase.from("documents").insert({
         organization_id: orgId, workspace_id: current!.workspace_id, doc_type: docType,
