@@ -107,7 +107,7 @@ function AgentDetail() {
             </div>
             <div className="rounded-2xl bg-card p-6 shadow-soft">
               <h3 className="font-semibold">Campaigns & activity</h3>
-              <p className="mt-3 text-sm text-muted-foreground">This agent isn't running any campaigns yet. Campaigns arrive in Phase 5.</p>
+              <p className="mt-3 text-sm text-muted-foreground">This agent isn't running any campaigns yet.</p>
             </div>
           </div>
         </TabsContent>

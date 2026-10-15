@@ -71,6 +71,13 @@
       "when": 1792068689055,
       "tag": "0009_settings_modules",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792069814035,
+      "tag": "0010_fix_insert_returning_policies",
+      "breakpoints": true
     }
   ]
 }

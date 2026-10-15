@@ -48,6 +48,11 @@ export function WorkspaceProvider({ user, children }: { user: User; children: Re
     setCurrentIdState(id);
   };
 
+  // Pages assume a current workspace exists, so wait for memberships before rendering them.
+  if (q.isLoading) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading your workspace…</div>;
+  if (q.isError) return <div className="flex min-h-screen items-center justify-center text-sm text-destructive">Couldn't load your workspace. Please refresh.</div>;
+  if (!current) return <div className="flex min-h-screen items-center justify-center p-6 text-center text-sm text-muted-foreground">Your account isn't an active member of any workspace. Ask a Super Admin to invite or reactivate you.</div>;
+
   return (
     <WorkspaceCtx.Provider
       value={{ user, memberships, current, setCurrentId, isAdmin: current?.role === "super_admin", refetch: q.refetch }}
