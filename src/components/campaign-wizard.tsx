@@ -386,7 +386,7 @@ export function QualificationStep({ campaign, onNext }: { campaign: Campaign; on
 }
 
 // ---------- Step 4 ----------
-export function ResearchStep({ campaign }: { campaign: Campaign }) {
+export function ResearchStep({ campaign, onNext }: { campaign: Campaign; onNext?: () => void }) {
   const qc = useQueryClient();
   const { current } = useWorkspace();
   const leads = useCampaignLeads(campaign.id);
@@ -434,7 +434,7 @@ export function ResearchStep({ campaign }: { campaign: Campaign }) {
           </div>
         ))}
       </div>
-      <div className={`${card} text-sm text-muted-foreground`}>Next steps — sequence, copy, approval and launch — arrive in Phase 6.</div>
+      {onNext && <Button variant="outline" onClick={async () => { await bumpStep(campaign, 5); qc.invalidateQueries({ queryKey: ["campaign", campaign.id] }); onNext(); }}>Continue to sequence →</Button>}
     </div>
   );
 }

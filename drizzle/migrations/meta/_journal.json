@@ -50,6 +50,13 @@
       "when": 1792064280760,
       "tag": "0006_campaigns_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792065905674,
+      "tag": "0007_sequences_messages_replies",
+      "breakpoints": true
     }
   ]
 }
