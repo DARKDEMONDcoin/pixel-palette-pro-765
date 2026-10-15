@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          avatar_path: string | null
+          bio: string | null
+          created_at: string
+          created_by: string
+          daily_send_cap: number
+          icp_company_sizes: string[]
+          icp_industries: string[]
+          icp_seniorities: string[]
+          icp_titles: string[]
+          id: string
+          mailbox_email: string | null
+          mailbox_last_tested_at: string | null
+          mailbox_provider: string | null
+          mailbox_status: string
+          min_delay_seconds: number
+          name: string
+          organization_id: string
+          send_days: number[]
+          send_end_hour: number
+          send_start_hour: number
+          send_timezone: string
+          signature: string | null
+          status: string
+          target_markets: string[]
+          tone: string
+          updated_at: string
+          warmup_enabled: boolean
+          warmup_increment: number
+          warmup_start_cap: number
+          workspace_id: string
+        }
+        Insert: {
+          avatar_path?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by?: string
+          daily_send_cap?: number
+          icp_company_sizes?: string[]
+          icp_industries?: string[]
+          icp_seniorities?: string[]
+          icp_titles?: string[]
+          id?: string
+          mailbox_email?: string | null
+          mailbox_last_tested_at?: string | null
+          mailbox_provider?: string | null
+          mailbox_status?: string
+          min_delay_seconds?: number
+          name: string
+          organization_id: string
+          send_days?: number[]
+          send_end_hour?: number
+          send_start_hour?: number
+          send_timezone?: string
+          signature?: string | null
+          status?: string
+          target_markets?: string[]
+          tone?: string
+          updated_at?: string
+          warmup_enabled?: boolean
+          warmup_increment?: number
+          warmup_start_cap?: number
+          workspace_id: string
+        }
+        Update: {
+          avatar_path?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by?: string
+          daily_send_cap?: number
+          icp_company_sizes?: string[]
+          icp_industries?: string[]
+          icp_seniorities?: string[]
+          icp_titles?: string[]
+          id?: string
+          mailbox_email?: string | null
+          mailbox_last_tested_at?: string | null
+          mailbox_provider?: string | null
+          mailbox_status?: string
+          min_delay_seconds?: number
+          name?: string
+          organization_id?: string
+          send_days?: number[]
+          send_end_hour?: number
+          send_start_hour?: number
+          send_timezone?: string
+          signature?: string | null
+          status?: string
+          target_markets?: string[]
+          tone?: string
+          updated_at?: string
+          warmup_enabled?: boolean
+          warmup_increment?: number
+          warmup_start_cap?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_chunks: {
         Row: {
           chunk_index: number
