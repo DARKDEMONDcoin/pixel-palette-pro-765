@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   LayoutDashboard, Bot, Megaphone, Inbox, Users, Building2, Plug, BarChart3, Settings,
-  Bell, HelpCircle, Search, ChevronsUpDown, LogOut, Check, Sparkles,
+  HelpCircle, Search, ChevronsUpDown, LogOut, Check, Sparkles,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { roleLabel, useWorkspace } from "@/lib/workspace";
+import { NotificationBell } from "@/components/notification-bell";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -107,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Input placeholder="Search leads, campaigns, agents…" className="rounded-full bg-secondary pl-9" />
           </div>
           <div className="ml-auto flex items-center gap-1">
-            <Button variant="ghost" size="icon" aria-label="Notifications"><Bell className="size-5" /></Button>
+            <NotificationBell />
             <Button variant="ghost" size="icon" aria-label="Help"><HelpCircle className="size-5" /></Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

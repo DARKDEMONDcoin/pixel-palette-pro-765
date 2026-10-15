@@ -184,5 +184,10 @@ export const logReply = createServerFn({ method: "POST" })
     }
     await admin.from("replies").insert({ workspace_id: campaign.workspace_id, campaign_id: campaign.id, campaign_lead_id: cl!.id, channel: data.channel, body: data.body,
       classification: out.classification, summary: out.summary.slice(0, 500), is_sql: isSql, freshsales_id: freshsalesId, crm_error: crmError, created_by: context.userId });
+    const { fireWebhooks } = await import("./sequence.server");
+    const hook = { campaign: { id: campaign.id, name: campaign.name }, lead: { email: l["email"], first_name: l["first_name"], last_name: l["last_name"], company: l["company"], title: l["title"] },
+      channel: data.channel, classification: out.classification, summary: out.summary, freshsales_id: freshsalesId };
+    await fireWebhooks(admin, campaign.workspace_id, "reply.received", hook);
+    if (isSql) await fireWebhooks(admin, campaign.workspace_id, "sql.created", hook);
     return { classification: out.classification, isSql, crmError };
   });

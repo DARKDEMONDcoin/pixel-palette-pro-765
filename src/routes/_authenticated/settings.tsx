@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { PageHeader, ComingSoon } from "@/components/app-shell";
+import { PageHeader } from "@/components/app-shell";
+import { ApiWebhooks, AuditLog, Compliance, Notifications, Usage } from "@/components/settings-modules";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,14 +28,20 @@ function SettingsPage() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
-          <TabsTrigger value="more">Compliance, billing & more</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance & suppression</TabsTrigger>
+          <TabsTrigger value="usage">Usage & billing</TabsTrigger>
+          {isAdmin && <TabsTrigger value="audit">Audit log</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="api">API & webhooks</TabsTrigger>}
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
         <TabsContent value="profile"><Profile /></TabsContent>
         <TabsContent value="workspace"><WorkspaceTab /></TabsContent>
         {isAdmin && <TabsContent value="team"><Team /></TabsContent>}
-        <TabsContent value="more">
-          <ComingSoon phase={9} title="More settings">Compliance & suppression, usage & billing, audit log, API & webhooks and notifications.</ComingSoon>
-        </TabsContent>
+        <TabsContent value="compliance"><Compliance /></TabsContent>
+        <TabsContent value="usage"><Usage /></TabsContent>
+        {isAdmin && <TabsContent value="audit"><AuditLog /></TabsContent>}
+        {isAdmin && <TabsContent value="api"><ApiWebhooks /></TabsContent>}
+        <TabsContent value="notifications"><Notifications /></TabsContent>
       </Tabs>
     </div>
   );

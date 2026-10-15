@@ -87,6 +87,7 @@ function LeadsPage() {
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = [cols.join(","), ...chosen.map((r) => cols.map((c) => esc(r[c])).join(","))].join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "leads.csv"; a.click();
+    void supabase.from("audit_log").insert({ workspace_id: ws!, actor: user.id, action: "export", entity: "leads", details: { rows: chosen.length } });
   }
 
   const reset = () => setPage(0);

@@ -31,6 +31,7 @@ import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrganizationsIndexRouteImport } from './routes/_authenticated/organizations.index'
 import { Route as AuthenticatedOrganizationsOrgIdRouteImport } from './routes/_authenticated/organizations.$orgId'
 import { Route as ApiPublicSequenceTickRouteImport } from './routes/api/public/sequence-tick'
+import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -150,6 +151,11 @@ const ApiPublicSequenceTickRoute = ApiPublicSequenceTickRouteImport.update({
   path: '/api/public/sequence-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1LeadsRoute = ApiPublicV1LeadsRouteImport.update({
+  id: '/api/public/v1/leads',
+  path: '/api/public/v1/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/agents/': typeof AuthenticatedAgentsIndexRoute
   '/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/organizations/': typeof AuthenticatedOrganizationsIndexRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AuthenticatedAgentsIndexRoute
   '/campaigns': typeof AuthenticatedCampaignsIndexRoute
   '/organizations': typeof AuthenticatedOrganizationsIndexRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/agents/': typeof AuthenticatedAgentsIndexRoute
   '/_authenticated/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/_authenticated/organizations/': typeof AuthenticatedOrganizationsIndexRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/agents/'
     | '/campaigns/'
     | '/organizations/'
+    | '/api/public/v1/leads'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/campaigns'
     | '/organizations'
+    | '/api/public/v1/leads'
   id:
     | '__root__'
     | '/'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agents/'
     | '/_authenticated/campaigns/'
     | '/_authenticated/organizations/'
+    | '/api/public/v1/leads'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicSequenceTickRoute: typeof ApiPublicSequenceTickRoute
+  ApiPublicV1LeadsRoute: typeof ApiPublicV1LeadsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -453,6 +466,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSequenceTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/leads': {
+      id: '/api/public/v1/leads'
+      path: '/api/public/v1/leads'
+      fullPath: '/api/public/v1/leads'
+      preLoaderRoute: typeof ApiPublicV1LeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -539,6 +559,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicSequenceTickRoute: ApiPublicSequenceTickRoute,
+  ApiPublicV1LeadsRoute: ApiPublicV1LeadsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

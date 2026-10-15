@@ -12,5 +12,5 @@
 - [ ] Phase 6b — Automatic email sending and reply capture — blocked: Gmail/Outlook sign-in apps not configured (replies logged by hand meanwhile)
 - [x] Phase 7 — Inbox and Leads database
 - [x] Phase 8 — Analytics and Dashboard (cost per SQL not tracked)
-- [ ] Phase 9 — Settings modules
+- [x] Phase 9 — Settings modules (unsubscribe links, bounces, token/cost metering, email notifications wait on mailbox sending)
 - [ ] Later — brand logo upload, OCR for scanned PDFs, dark theme, 2FA, demo workspace

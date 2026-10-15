@@ -90,3 +90,20 @@ export async function runDue(admin: Admin, limit = 50) {
   }
   return out;
 }
+
+/** Posts an event to every active workspace webhook subscribed to it, signed with HMAC-SHA256 (X-Signature header). */
+export async function fireWebhooks(admin: Admin, ws: string, event: string, payload: Record<string, unknown>) {
+  const { data: hooks } = await admin.from("webhooks").select("id,url,secret,events").eq("workspace_id", ws).eq("active", true);
+  for (const h of hooks ?? []) {
+    if (!h.events.includes(event)) continue;
+    const body = JSON.stringify({ event, created_at: new Date().toISOString(), data: payload });
+    let status: number | null = null, err: string | null = null;
+    try {
+      const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(h.secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      const sig = Array.from(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body)))).map((b) => b.toString(16).padStart(2, "0")).join("");
+      const r = await fetch(h.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Event": event, "X-Signature": `sha256=${sig}` }, body });
+      status = r.status; if (!r.ok) err = (await r.text()).slice(0, 200);
+    } catch (e) { err = e instanceof Error ? e.message : "Request failed"; }
+    await admin.from("webhooks").update({ last_status: status, last_error: err, last_sent_at: new Date().toISOString() }).eq("id", h.id);
+  }
+}

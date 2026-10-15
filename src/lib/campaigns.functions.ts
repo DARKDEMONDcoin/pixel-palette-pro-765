@@ -26,7 +26,9 @@ const clean = (v: unknown, n = 300) => (typeof v === "string" && v.trim() ? v.tr
 
 async function addLeads(admin: Awaited<ReturnType<typeof assertEdit>>["admin"], campaign: { id: string; workspace_id: string; created_by: string }, rows: LeadInput[], source: string, userId: string) {
   const ws = campaign.workspace_id;
-  const { data: supp } = await admin.from("suppression_list").select("kind,value").eq("workspace_id", ws);
+  const { data: org } = await admin.from("campaigns").select("organization_id").eq("id", campaign.id).single();
+  const { data: supp0 } = await admin.from("suppression_list").select("kind,value,organization_id").eq("workspace_id", ws);
+  const supp = (supp0 ?? []).filter((s) => !s.organization_id || s.organization_id === org?.organization_id);
   const suppEmails = new Set((supp ?? []).filter((s) => s.kind === "email").map((s) => s.value.toLowerCase()));
   const suppDomains = new Set((supp ?? []).filter((s) => s.kind === "domain").map((s) => s.value.toLowerCase()));
   let suppressed = 0, invalid = 0, duplicates = 0;
