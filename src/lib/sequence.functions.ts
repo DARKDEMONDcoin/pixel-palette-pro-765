@@ -147,7 +147,8 @@ export const logReply = createServerFn({ method: "POST" })
     const { data: cl0 } = await a0.from("campaign_leads").select("campaign_id").eq("id", data.campaignLeadId).single();
     if (!cl0) throw new Error("Lead not found");
     const { admin, campaign } = await assertEdit(context.supabase, cl0.campaign_id);
-    const { data: cl } = await admin.from("campaign_leads").select("id,lead:leads(*)").eq("id", data.campaignLeadId).single();
+    const { data: cl } = await admin.from("campaign_leads").select("id,status,lead:leads(*)").eq("id", data.campaignLeadId).single();
+    const alreadySql = cl?.status === "sql";
     const l = cl!.lead as unknown as Record<string, string | null>;
     const { getLlmConfig, llmJson } = await import("./llm.server");
     const cfg = await getLlmConfig(campaign.workspace_id, "scoring");
@@ -163,7 +164,8 @@ export const logReply = createServerFn({ method: "POST" })
     if (out.classification === "unsubscribe" && l["email"])
       await admin.from("suppression_list").insert({ workspace_id: campaign.workspace_id, value: l["email"].toLowerCase(), kind: "email", reason: "Unsubscribed via reply", created_by: context.userId });
     const { integration, slackAlert } = await import("./sequence.server");
-    if (isSql) {
+    if (isSql && alreadySql) crmError = "Already an SQL — not pushed to Freshsales again";
+    if (isSql && !alreadySql) {
       const fs = await integration(admin, campaign.workspace_id, "freshsales");
       if (!fs) crmError = "Freshsales not connected";
       else {
@@ -190,6 +192,6 @@ export const logReply = createServerFn({ method: "POST" })
     const hook = { campaign: { id: campaign.id, name: campaign.name }, lead: { email: l["email"], first_name: l["first_name"], last_name: l["last_name"], company: l["company"], title: l["title"] },
       channel: data.channel, classification: out.classification, summary: out.summary, freshsales_id: freshsalesId };
     await fireWebhooks(admin, campaign.workspace_id, "reply.received", hook);
-    if (isSql) await fireWebhooks(admin, campaign.workspace_id, "sql.created", hook);
+    if (isSql && !alreadySql) await fireWebhooks(admin, campaign.workspace_id, "sql.created", hook);
     return { classification: out.classification, isSql, crmError };
   });
