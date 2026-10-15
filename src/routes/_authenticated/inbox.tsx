@@ -53,7 +53,7 @@ function InboxPage() {
 
   async function markHandled(id: string, handled: boolean) {
     const { error } = await supabase.from("replies").update({ handled }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["inbox"] });
   }
 

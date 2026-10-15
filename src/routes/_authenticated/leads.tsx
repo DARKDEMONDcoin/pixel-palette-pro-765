@@ -70,7 +70,7 @@ function LeadsPage() {
     const emails = chosen.map((r) => r.email?.toLowerCase()).filter((e): e is string => !!e && !suppressed(e));
     if (emails.length) {
       const { error } = await supabase.from("suppression_list").insert(emails.map((value) => ({ workspace_id: ws!, value, kind: "email", reason: "Added from Leads", created_by: user.id })));
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
     }
     const clIds = chosen.flatMap((r) => r.cl.map((c) => c.id));
     if (clIds.length) {
