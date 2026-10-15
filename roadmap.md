@@ -8,7 +8,8 @@
 - [ ] Phase 4b — LinkedIn and calling providers — blocked: provider not chosen
 - [x] Phase 5 — Campaign wizard steps 1–4 (basics, sources, qualification, research)
 - [ ] Phase 5b — Google Sheet lead source — blocked: workspace Google OAuth app not configured
-- [ ] Phase 6 — Wizard steps 5–8 (sequence, copy, approval, launch), sequence engine, approvals, reply classification, SQL → Freshsales
+- [x] Phase 6 — Wizard steps 5–8, sequence engine (10-min sender), approvals, reply classification, SQL → Freshsales + Slack
+- [ ] Phase 6b — Automatic email sending and reply capture — blocked: Gmail/Outlook sign-in apps not configured (replies logged by hand meanwhile)
 - [ ] Phase 7 — Inbox and Leads database
 - [ ] Phase 8 — Analytics and Dashboard
 - [ ] Phase 9 — Settings modules
