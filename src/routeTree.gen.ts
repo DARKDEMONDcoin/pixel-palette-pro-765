@@ -30,6 +30,7 @@ import { Route as AuthenticatedCampaignsCampaignIdRouteImport } from './routes/_
 import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authenticated/campaigns.new'
 import { Route as AuthenticatedOrganizationsIndexRouteImport } from './routes/_authenticated/organizations.index'
 import { Route as AuthenticatedOrganizationsOrgIdRouteImport } from './routes/_authenticated/organizations.$orgId'
+import { Route as ApiPublicSequenceTickRouteImport } from './routes/api/public/sequence-tick'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -144,6 +145,11 @@ const AuthenticatedOrganizationsOrgIdRoute =
     path: '/$orgId',
     getParentRoute: () => AuthenticatedOrganizationsRoute,
   } as any)
+const ApiPublicSequenceTickRoute = ApiPublicSequenceTickRouteImport.update({
+  id: '/api/public/sequence-tick',
+  path: '/api/public/sequence-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/agents/': typeof AuthenticatedAgentsIndexRoute
   '/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/organizations/': typeof AuthenticatedOrganizationsIndexRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/agents': typeof AuthenticatedAgentsIndexRoute
   '/campaigns': typeof AuthenticatedCampaignsIndexRoute
   '/organizations': typeof AuthenticatedOrganizationsIndexRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/_authenticated/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/_authenticated/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/_authenticated/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/_authenticated/agents/': typeof AuthenticatedAgentsIndexRoute
   '/_authenticated/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/_authenticated/organizations/': typeof AuthenticatedOrganizationsIndexRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/organizations/$orgId'
+    | '/api/public/sequence-tick'
     | '/agents/'
     | '/campaigns/'
     | '/organizations/'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/organizations/$orgId'
+    | '/api/public/sequence-tick'
     | '/agents'
     | '/campaigns'
     | '/organizations'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campaigns/$campaignId'
     | '/_authenticated/campaigns/new'
     | '/_authenticated/organizations/$orgId'
+    | '/api/public/sequence-tick'
     | '/_authenticated/agents/'
     | '/_authenticated/campaigns/'
     | '/_authenticated/organizations/'
@@ -282,6 +294,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicSequenceTickRoute: typeof ApiPublicSequenceTickRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrganizationsOrgIdRouteImport
       parentRoute: typeof AuthenticatedOrganizationsRoute
     }
+    '/api/public/sequence-tick': {
+      id: '/api/public/sequence-tick'
+      path: '/api/public/sequence-tick'
+      fullPath: '/api/public/sequence-tick'
+      preLoaderRoute: typeof ApiPublicSequenceTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -518,6 +538,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicSequenceTickRoute: ApiPublicSequenceTickRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
