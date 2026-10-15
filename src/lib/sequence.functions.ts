@@ -159,7 +159,7 @@ export const logReply = createServerFn({ method: "POST" })
     let freshsalesId: string | null = null, crmError: string | null = null;
     // Stop the sequence for this lead.
     await admin.from("messages").update({ status: "skipped", error: "Lead replied" }).eq("campaign_lead_id", cl!.id).in("status", ["scheduled", "waiting", "approved", "draft"]);
-    const leadStatus = out.classification === "unsubscribe" ? "unsubscribed" : isSql ? "sql" : "replied";
+    const leadStatus = out.classification === "unsubscribe" ? "unsubscribed" : isSql || alreadySql ? "sql" : "replied";
     await admin.from("campaign_leads").update({ status: leadStatus }).eq("id", cl!.id);
     if (out.classification === "unsubscribe" && l["email"])
       await admin.from("suppression_list").insert({ workspace_id: campaign.workspace_id, value: l["email"].toLowerCase(), kind: "email", reason: "Unsubscribed via reply", created_by: context.userId });
