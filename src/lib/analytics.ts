@@ -54,8 +54,14 @@ export function useAnalytics(ws: string | undefined, days: number) {
         bump(m.campaign_id, (s) => { s.sent++; if (m.channel === "email" || m.channel === "linkedin" || m.channel === "call") s[m.channel]++; }, m.variant);
         if (m.sent_at) day(m.sent_at).sent++;
       }
+      // Interested/SQL/unsubscribe count each lead once, even if they reply several times.
+      const seen = new Set<string>();
+      const once = (k: string) => (seen.has(k) ? false : (seen.add(k), true));
       for (const r of reps) {
-        bump(r.campaign_id, (s) => { s.replies++; if (r.classification === "interested" || r.classification === "meeting_request" || r.is_sql) s.interested++; if (r.is_sql) s.sqls++; if (r.classification === "unsubscribe") s.unsub++; }, variantOfLead.get(r.campaign_lead_id));
+        const interested = (r.classification === "interested" || r.classification === "meeting_request" || r.is_sql) && once(`i:${r.campaign_lead_id}`);
+        const sql = r.is_sql && once(`s:${r.campaign_lead_id}`);
+        const unsub = r.classification === "unsubscribe" && once(`u:${r.campaign_lead_id}`);
+        bump(r.campaign_id, (s) => { s.replies++; if (interested) s.interested++; if (sql) s.sqls++; if (unsub) s.unsub++; }, variantOfLead.get(r.campaign_lead_id));
         day(r.created_at).replies++;
       }
       const series = Array.from({ length: days }, (_, i) => {

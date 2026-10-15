@@ -168,8 +168,8 @@ function FileImport({ campaign, onDone }: { campaign: Campaign; onDone: () => vo
 
   async function onFile(f: File) {
     const XLSX = await import("xlsx");
-    const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
-    const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]!]!, { defval: "" });
+    const wb = XLSX.read(await f.arrayBuffer(), { type: "array", raw: /\.csv$/i.test(f.name), cellDates: false });
+    const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]!]!, { defval: "", raw: false });
     if (!data.length) { toast.error("No rows found in this file"); return; }
     const hs = Object.keys(data[0]!);
     const m: Record<string, string> = {};
