@@ -128,6 +128,161 @@ export type Database = {
           },
         ]
       }
+      campaign_leads: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          decision: string
+          decision_overridden: boolean
+          id: string
+          lead_id: string
+          qualify_error: string | null
+          reasoning: string | null
+          research: Json | null
+          research_error: string | null
+          research_status: string
+          score: number | null
+          signals: Json
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          decision?: string
+          decision_overridden?: boolean
+          id?: string
+          lead_id: string
+          qualify_error?: string | null
+          reasoning?: string | null
+          research?: Json | null
+          research_error?: string | null
+          research_status?: string
+          score?: number | null
+          signals?: Json
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          decision?: string
+          decision_overridden?: boolean
+          id?: string
+          lead_id?: string
+          qualify_error?: string | null
+          reasoning?: string | null
+          research?: Json | null
+          research_error?: string | null
+          research_status?: string
+          score?: number | null
+          signals?: Json
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_leads_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          ab_testing: boolean
+          agent_id: string
+          created_at: string
+          created_by: string
+          id: string
+          language: string
+          name: string
+          organization_id: string
+          qualification_threshold: number
+          qualification_weights: Json
+          source_config: Json
+          source_type: string | null
+          status: string
+          updated_at: string
+          wizard_step: number
+          workspace_id: string
+        }
+        Insert: {
+          ab_testing?: boolean
+          agent_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          language?: string
+          name: string
+          organization_id: string
+          qualification_threshold?: number
+          qualification_weights?: Json
+          source_config?: Json
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          wizard_step?: number
+          workspace_id: string
+        }
+        Update: {
+          ab_testing?: boolean
+          agent_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          language?: string
+          name?: string
+          organization_id?: string
+          qualification_threshold?: number
+          qualification_weights?: Json
+          source_config?: Json
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          wizard_step?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_chunks: {
         Row: {
           chunk_index: number
@@ -309,6 +464,89 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          apollo_id: string | null
+          city: string | null
+          company: string | null
+          company_domain: string | null
+          company_size: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          extra: Json
+          first_name: string | null
+          id: string
+          industry: string | null
+          language: string | null
+          last_name: string | null
+          linkedin_url: string | null
+          phone: string | null
+          seniority: string | null
+          source: string
+          title: string | null
+          website: string | null
+          workspace_id: string
+        }
+        Insert: {
+          apollo_id?: string | null
+          city?: string | null
+          company?: string | null
+          company_domain?: string | null
+          company_size?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          extra?: Json
+          first_name?: string | null
+          id?: string
+          industry?: string | null
+          language?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          seniority?: string | null
+          source?: string
+          title?: string | null
+          website?: string | null
+          workspace_id: string
+        }
+        Update: {
+          apollo_id?: string | null
+          city?: string | null
+          company?: string | null
+          company_domain?: string | null
+          company_size?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          extra?: Json
+          first_name?: string | null
+          id?: string
+          industry?: string | null
+          language?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          seniority?: string | null
+          source?: string
+          title?: string | null
+          website?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_access: {
         Row: {
           created_at: string
@@ -427,6 +665,44 @@ export type Database = {
         }
         Relationships: []
       }
+      suppression_list: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          reason: string | null
+          value: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          reason?: string | null
+          value: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          reason?: string | null
+          value?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppression_list_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_invitations: {
         Row: {
           accepted_at: string | null
@@ -535,7 +811,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_campaign: { Args: { _c: string }; Returns: boolean }
       can_access_org: { Args: { _org: string }; Returns: boolean }
+      can_edit_campaign: { Args: { _c: string }; Returns: boolean }
       can_edit_org: { Args: { _org: string }; Returns: boolean }
       create_workspace: { Args: { _name: string }; Returns: string }
       has_ws_role: {
