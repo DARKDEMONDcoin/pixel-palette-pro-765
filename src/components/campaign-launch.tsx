@@ -15,9 +15,9 @@ import type { Campaign } from "@/components/campaign-wizard";
 const card = "rounded-2xl bg-card p-6 shadow-soft";
 const sel = "h-9 rounded-md border border-input bg-background px-3 text-sm";
 const CH = {
-  email: { label: "Email", icon: Mail, cls: "bg-primary/10 text-primary" },
-  linkedin: { label: "LinkedIn", icon: Linkedin, cls: "bg-blue/15 text-blue" },
-  call: { label: "Call", icon: Phone, cls: "bg-teal/15 text-teal" },
+  email: { label: "Email", icon: Mail, cls: "bg-channel-email/10 text-channel-email" },
+  linkedin: { label: "LinkedIn", icon: Linkedin, cls: "bg-channel-linkedin/15 text-channel-linkedin" },
+  call: { label: "Call", icon: Phone, cls: "bg-channel-call/15 text-channel-call" },
 } as const;
 type Ch = keyof typeof CH;
 
@@ -129,7 +129,7 @@ export function CopyStep({ campaign, onNext }: { campaign: Campaign; onNext: () 
 export function ApprovalStep({ campaign, onNext }: { campaign: Campaign; onNext: () => void }) {
   const msgs = useMessages(campaign.id);
   const qc = useQueryClient();
-  const { current, user } = useWorkspace() as ReturnType<typeof useWorkspace> & { user?: { id: string } };
+  const { current, user } = useWorkspace();
   const ro = current?.role === "viewer" || campaign.status !== "draft";
   const [filter, setFilter] = useState("draft");
   const [edit, setEdit] = useState<Record<string, { subject: string; body: string }>>({});
@@ -137,7 +137,7 @@ export function ApprovalStep({ campaign, onNext }: { campaign: Campaign; onNext:
   async function setStatus(ids: string[], status: "approved" | "rejected") {
     for (const id of ids) {
       const e = edit[id];
-      const { error } = await supabase.from("messages").update({ status, ...(e ? { subject: e.subject, body: e.body } : {}), approved_at: status === "approved" ? new Date().toISOString() : null, approved_by: status === "approved" ? (user?.id ?? null) : null }).eq("id", id);
+      const { error } = await supabase.from("messages").update({ status, ...(e ? { subject: e.subject, body: e.body } : {}), approved_at: status === "approved" ? new Date().toISOString() : null, approved_by: status === "approved" ? user.id : null }).eq("id", id);
       if (error) { toast.error(error.message); return; }
     }
     setEdit({}); qc.invalidateQueries({ queryKey: ["messages", campaign.id] });
@@ -220,7 +220,7 @@ export function LaunchStep({ campaign }: { campaign: Campaign }) {
           {[["Scheduled", c["scheduled"]], ["Sent", c["sent"]], ["Waiting", c["waiting"]], ["Failed", c["failed"]], ["Replies", replies.data?.length]].map(([l, n]) => (
             <div key={l as string} className="rounded-xl bg-muted/50 p-3"><div className="text-xs text-muted-foreground">{l}</div><div className="font-display text-xl font-semibold">{n ?? 0}</div></div>))}
         </div>
-        {waitingReasons.length > 0 && <div className="rounded-xl bg-amber/10 p-3 text-sm">{waitingReasons.map((r) => <div key={r}>• {r}</div>)}</div>}
+        {waitingReasons.length > 0 && <div className="rounded-xl bg-warning/10 p-3 text-sm">{waitingReasons.map((r) => <div key={r}>• {r}</div>)}</div>}
         <p className="text-xs text-muted-foreground">Due steps are sent automatically every 10 minutes within the agent's sending days, hours and daily cap.</p>
       </div>
       {campaign.status !== "draft" && <div className={card}>
@@ -229,7 +229,7 @@ export function LaunchStep({ campaign }: { campaign: Campaign }) {
           {[...leads.values()].map((l) => (
             <div key={l.id} className="py-3">
               <div className="flex items-center gap-2 text-sm"><b>{name(l.lead)}</b><span className="text-muted-foreground">· {l.lead.company}</span>
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${l.status === "sql" ? "bg-amber/20" : "bg-muted"}`}>{l.status === "sql" ? "SQL" : l.status}</span>
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${l.status === "sql" ? "bg-warning/20" : "bg-muted"}`}>{l.status === "sql" ? "SQL" : l.status}</span>
                 {!ro && <Button size="sm" variant="ghost" className="ml-auto" onClick={() => { setOpen(open === l.id ? null : l.id); setText(""); }}>Log reply</Button>}</div>
               {open === l.id && <div className="mt-2 space-y-2">
                 <div className="flex gap-2"><select className={sel} value={ch} onChange={(e) => setCh(e.target.value)}><option value="email">Email</option><option value="linkedin">LinkedIn</option><option value="call">Call notes</option></select></div>
@@ -246,7 +246,7 @@ export function LaunchStep({ campaign }: { campaign: Campaign }) {
         <h3 className="mb-3 font-display font-semibold">Replies</h3>
         {replies.data.map((r) => (
           <div key={r.id} className="border-b py-2 text-sm last:border-0">
-            <div className="flex items-center gap-2"><ChannelChip ch={r.channel} /><b>{r.classification?.replace("_", " ")}</b>{r.is_sql && <span className="rounded-full bg-amber/20 px-2 text-xs">SQL</span>}
+            <div className="flex items-center gap-2"><ChannelChip ch={r.channel} /><b>{r.classification?.replace("_", " ")}</b>{r.is_sql && <span className="rounded-full bg-warning/20 px-2 text-xs">SQL</span>}
               <span className="ml-auto text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span></div>
             <p className="text-muted-foreground">{r.summary}</p>
             {r.is_sql && <p className="text-xs">{r.freshsales_id ? `Freshsales contact #${r.freshsales_id}` : `Not in Freshsales: ${r.crm_error}`}</p>}
