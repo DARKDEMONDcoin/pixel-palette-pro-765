@@ -54,14 +54,14 @@ export function BasicsForm({ campaign, onSaved }: { campaign?: Campaign | undefi
   const readOnly = current?.role === "viewer";
 
   async function save() {
-    if (!name.trim() || !agent) return toast.error("Enter a name and choose an agent");
+    if (!name.trim() || !agent) { toast.error("Enter a name and choose an agent"); return; }
     setBusy(true);
     const row = { name: name.trim(), agent_id: agent.id, organization_id: agent.organization_id, language, ab_testing: ab, updated_at: new Date().toISOString() };
     const res = campaign
       ? await supabase.from("campaigns").update({ ...row, wizard_step: Math.max(campaign.wizard_step, 2) }).eq("id", campaign.id).select("id").single()
       : await supabase.from("campaigns").insert({ ...row, workspace_id: current!.workspace_id, wizard_step: 2 }).select("id").single();
     setBusy(false);
-    if (res.error) return toast.error(res.error.message);
+    if (res.error) { toast.error(res.error.message); return; }
     qc.invalidateQueries({ queryKey: ["campaign", res.data.id] });
     qc.invalidateQueries({ queryKey: ["campaigns"] });
     onSaved(res.data.id);
@@ -170,14 +170,14 @@ function FileImport({ campaign, onDone }: { campaign: Campaign; onDone: () => vo
     const XLSX = await import("xlsx");
     const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
     const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]!]!, { defval: "" });
-    if (!data.length) return toast.error("No rows found in this file");
+    if (!data.length) { toast.error("No rows found in this file"); return; }
     const hs = Object.keys(data[0]!);
     const m: Record<string, string> = {};
     for (const f2 of LEAD_FIELDS) { const h = hs.find((h) => GUESS[f2]?.includes(norm(h))); if (h) m[f2] = h; }
     setFileName(f.name); setRows(data); setHeaders(hs); setMap(m);
   }
   async function doImport() {
-    if (!map["email"] && !map["linkedin_url"]) return toast.error("Map at least the Email or LinkedIn column");
+    if (!map["email"] && !map["linkedin_url"]) { toast.error("Map at least the Email or LinkedIn column"); return; }
     setBusy(true);
     try {
       let tot = { added: 0, duplicates: 0, suppressed: 0, invalid: 0 };
@@ -305,7 +305,7 @@ export function QualificationStep({ campaign, onNext }: { campaign: Campaign; on
 
   async function saveSettings() {
     const { error } = await supabase.from("campaigns").update({ qualification_weights: w, qualification_threshold: threshold }).eq("id", campaign.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     // re-apply threshold to scored, non-overridden leads
     const scored = leads.data?.filter((l) => l.score !== null && !l.decision_overridden) ?? [];
     const up = scored.filter((l) => l.score! >= threshold && l.decision !== "qualified").map((l) => l.id);
