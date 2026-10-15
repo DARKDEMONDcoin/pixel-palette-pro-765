@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export type Provider = "apollo" | "freshsales" | "slack";
 const PROVIDERS: Provider[] = ["apollo", "freshsales", "slack"];
 
-type Input = { workspaceId: string; provider: Provider; secret?: string; config?: Record<string, string> };
+type Input = { workspaceId: string; provider: Provider; secret?: string | undefined; config?: Record<string, string> | undefined };
 
 function validate(d: unknown): Input {
   const x = d as Input;
