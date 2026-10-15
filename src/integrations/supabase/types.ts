@@ -813,6 +813,7 @@ export type Database = {
           created_by: string | null
           crm_error: string | null
           freshsales_id: string | null
+          handled: boolean
           id: string
           is_sql: boolean
           summary: string | null
@@ -828,6 +829,7 @@ export type Database = {
           created_by?: string | null
           crm_error?: string | null
           freshsales_id?: string | null
+          handled?: boolean
           id?: string
           is_sql?: boolean
           summary?: string | null
@@ -843,6 +845,7 @@ export type Database = {
           created_by?: string | null
           crm_error?: string | null
           freshsales_id?: string | null
+          handled?: boolean
           id?: string
           is_sql?: boolean
           summary?: string | null
