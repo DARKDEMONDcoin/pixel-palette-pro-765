@@ -242,6 +242,73 @@ export type Database = {
           },
         ]
       }
+      integration_secrets: {
+        Row: {
+          integration_id: string
+          secret: string
+          updated_at: string
+        }
+        Insert: {
+          integration_id: string
+          secret: string
+          updated_at?: string
+        }
+        Update: {
+          integration_id?: string
+          secret?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_secrets_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: true
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          config: Json
+          id: string
+          last_error: string | null
+          last_tested_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          config?: Json
+          id?: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          config?: Json
+          id?: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_access: {
         Row: {
           created_at: string
