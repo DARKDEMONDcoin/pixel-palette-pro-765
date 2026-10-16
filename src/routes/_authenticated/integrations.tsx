@@ -164,7 +164,7 @@ function IntegrationCard({ def, ws, row, canEdit }: { def: (typeof defs)[number]
       {row?.last_tested_at && <p className="mt-2 text-xs text-muted-foreground">Last tested {new Date(row.last_tested_at).toLocaleString()}</p>}
       {canEdit && (
         <div className="mt-4 flex gap-2">
-          <Button onClick={test} disabled={busy || (!secret && !row && !(def.id === "llm" && llmProvider === "lovable"))}>{busy && <Loader2 className="size-4 animate-spin" />}{row ? "Save & test" : "Connect"}</Button>
+          <Button onClick={test} disabled={busy || (!secret && !row && def.id !== "vapi" && !(def.id === "llm" && llmProvider === "lovable"))}>{busy && <Loader2 className="size-4 animate-spin" />}{row ? "Save & test" : "Connect"}</Button>
           {row && <Button variant="ghost" disabled={busy} onClick={() => run(() => disconnect({ data: { workspaceId: ws, provider: def.id } }))}>Disconnect</Button>}
         </div>
       )}

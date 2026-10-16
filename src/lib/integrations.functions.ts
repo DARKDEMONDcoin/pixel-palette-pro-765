@@ -75,6 +75,14 @@ export const saveIntegration = createServerFn({ method: "POST" })
       const { data: s } = await supabaseAdmin.from("integration_secrets").select("secret").eq("integration_id", existing.id).maybeSingle();
       secret = s?.secret;
     }
+    if (data.provider === "vapi") {
+      // Fall back to keys saved through the secure form
+      secret = secret || process.env["VAPI_API_KEY"] || undefined;
+      const c = (data.config ??= {});
+      c["assistant_en"] ||= process.env["VAPI_ASSISTANT_EN"] ?? "";
+      c["assistant_ar"] ||= process.env["VAPI_ASSISTANT_AR"] ?? "";
+      c["phone_number_id"] ||= process.env["VAPI_PHONE_NUMBER_ID"] ?? "";
+    }
     const builtin = data.provider === "llm" && (data.config?.["provider"] ?? "lovable") === "lovable";
     if (builtin) secret = "";
     else if (!secret) throw new Error("Enter the API key first");
