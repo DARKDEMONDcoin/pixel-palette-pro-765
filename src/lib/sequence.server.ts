@@ -79,7 +79,10 @@ export async function runDue(admin: Admin, limit = 50) {
         else {
           const r = await fetch("https://api.vapi.ai/call", { method: "POST", headers: { Authorization: `Bearer ${v.secret}`, "Content-Type": "application/json" },
             body: JSON.stringify({ assistantId: assistant, phoneNumberId: v.config["phone_number_id"], customer: { number: l["phone"] },
-              assistantOverrides: { variableValues: { first_name: l["first_name"] ?? "", company: l["company"] ?? "", talking_points: m.body } } }) });
+              metadata: { message_id: m.id, campaign_lead_id: m.campaign_lead_id, workspace_id: m.workspace_id },
+              assistantOverrides: { variableValues: { first_name: l["first_name"] ?? "", company: l["company"] ?? "", talking_points: m.body },
+                server: { url: `${process.env["PUBLIC_APP_URL"] || "https://project--b9731eeb-6ff3-47d5-9a73-e457692f0843.lovable.app"}/api/public/vapi-webhook`, secret: process.env["VAPI_WEBHOOK_SECRET"] ?? "" },
+                serverMessages: ["end-of-call-report"] } }) });
           if (!r.ok) error = `Vapi [${r.status}]: ${(await r.text()).slice(0, 200)}`;
         }
       }
@@ -106,4 +109,61 @@ export async function fireWebhooks(admin: Admin, ws: string, event: string, payl
     } catch (e) { err = e instanceof Error ? e.message : "Request failed"; }
     await admin.from("webhooks").update({ last_status: status, last_error: err, last_sent_at: new Date().toISOString() }).eq("id", h.id);
   }
+}
+
+export const SQL_CLASSES_SERVER = ["interested", "meeting_request"];
+const replySchema = {
+  type: "object", additionalProperties: false, required: ["classification", "summary"],
+  properties: { classification: { type: "string", enum: ["interested", "meeting_request", "question", "not_now", "not_interested", "unsubscribe", "out_of_office", "referral", "other"] }, summary: { type: "string" } },
+};
+
+/** Classifies a reply, stops the sequence, pushes SQLs to Freshsales/Slack/webhooks and stores it. Shared by manual logging and the Vapi webhook. */
+export async function processReply(admin: Admin, input: { campaignLeadId: string; body: string; channel: string; createdBy: string | null }) {
+  const { data: cl } = await admin.from("campaign_leads").select("id,status,campaign_id,lead:leads(*)").eq("id", input.campaignLeadId).single();
+  if (!cl) throw new Error("Lead not found");
+  const { data: campaign } = await admin.from("campaigns").select("*").eq("id", cl.campaign_id).single();
+  if (!campaign) throw new Error("Campaign not found");
+  const alreadySql = cl.status === "sql";
+  const l = cl.lead as unknown as Record<string, string | null>;
+  const { getLlmConfig, llmJson } = await import("./llm.server");
+  const cfg = await getLlmConfig(campaign.workspace_id, "scoring");
+  const out = await llmJson<{ classification: string; summary: string }>(cfg,
+    "Classify a prospect's reply (or phone call transcript) to B2B outreach. interested = wants to learn more; meeting_request = proposes or accepts a meeting; not_now = timing; unsubscribe = asks to stop/remove. summary: one sentence.",
+    input.body, "reply_class", replySchema);
+  const isSql = SQL_CLASSES_SERVER.includes(out.classification);
+  let freshsalesId: string | null = null, crmError: string | null = null;
+  await admin.from("messages").update({ status: "skipped", error: "Lead replied" }).eq("campaign_lead_id", cl.id).in("status", ["scheduled", "waiting", "approved", "draft"]);
+  const leadStatus = out.classification === "unsubscribe" ? "unsubscribed" : isSql || alreadySql ? "sql" : "replied";
+  await admin.from("campaign_leads").update({ status: leadStatus }).eq("id", cl.id);
+  if (out.classification === "unsubscribe" && l["email"])
+    await admin.from("suppression_list").insert({ workspace_id: campaign.workspace_id, value: l["email"].toLowerCase(), kind: "email", reason: "Unsubscribed via reply", created_by: input.createdBy });
+  if (isSql && alreadySql) crmError = "Already an SQL — not pushed to Freshsales again";
+  if (isSql && !alreadySql) {
+    const fs = await integration(admin, campaign.workspace_id, "freshsales");
+    if (!fs) crmError = "Freshsales not connected";
+    else {
+      try {
+        const custom: Record<string, string> = {};
+        const { data: ag } = await admin.from("agents").select("name").eq("id", campaign.agent_id).single();
+        const { data: org } = await admin.from("organizations").select("name").eq("id", campaign.organization_id).single();
+        const ours: Record<string, string> = { agent: ag?.name ?? "", brand: org?.name ?? "", campaign: campaign.name, reply_summary: out.summary };
+        for (const pair of (fs.config["map_custom_fields"] ?? "").split(",")) { const [k, v] = pair.split("=").map((x) => x.trim()); if (k && v && ours[k] !== undefined) custom[v] = ours[k]!; }
+        const contact: Record<string, unknown> = { first_name: l["first_name"], last_name: l["last_name"] || l["company"] || "Unknown", email: l["email"], job_title: l["title"],
+          external_id: l["apollo_id"] ?? undefined, ...(fs.config["map_owner_id"] ? { owner_id: Number(fs.config["map_owner_id"]) } : {}), ...(Object.keys(custom).length ? { custom_field: custom } : {}) };
+        const domain = fs.config["domain"]!.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+        const r = await fetch(`https://${domain}/crm/sales/api/contacts`, { method: "POST", headers: { Authorization: `Token token=${fs.secret}`, "Content-Type": "application/json" }, body: JSON.stringify({ contact }) });
+        const t = await r.text();
+        if (!r.ok) crmError = `Freshsales [${r.status}]: ${t.slice(0, 200)}`;
+        else freshsalesId = String((JSON.parse(t) as { contact?: { id?: number } }).contact?.id ?? "");
+      } catch (e) { crmError = e instanceof Error ? e.message : "Freshsales push failed"; }
+    }
+    await slackAlert(admin, campaign.workspace_id, `:fire: New SQL — ${l["first_name"] ?? ""} ${l["last_name"] ?? ""} (${l["title"] ?? ""}, ${l["company"] ?? ""}) replied to "${campaign.name}" via ${input.channel}: ${out.summary}`);
+  }
+  await admin.from("replies").insert({ workspace_id: campaign.workspace_id, campaign_id: campaign.id, campaign_lead_id: cl.id, channel: input.channel, body: input.body,
+    classification: out.classification, summary: out.summary.slice(0, 500), is_sql: isSql, freshsales_id: freshsalesId, crm_error: crmError, created_by: input.createdBy });
+  const hook = { campaign: { id: campaign.id, name: campaign.name }, lead: { email: l["email"], first_name: l["first_name"], last_name: l["last_name"], company: l["company"], title: l["title"] },
+    channel: input.channel, classification: out.classification, summary: out.summary, freshsales_id: freshsalesId };
+  await fireWebhooks(admin, campaign.workspace_id, "reply.received", hook);
+  if (isSql && !alreadySql) await fireWebhooks(admin, campaign.workspace_id, "sql.created", hook);
+  return { classification: out.classification, isSql, crmError };
 }
