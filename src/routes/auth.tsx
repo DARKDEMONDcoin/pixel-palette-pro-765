@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +50,20 @@ function AuthPage() {
       if (data.user) navigate({ to: safePath(redirect) as "/dashboard" });
     });
   }, []);
+
+  async function social(provider: "google" | "microsoft") {
+    setBusy(true);
+    try {
+      const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/auth" });
+      if (r.error) throw r.error;
+      if (r.redirected) return;
+      navigate({ to: safePath(redirect) as "/dashboard" });
+    } catch (err) {
+      toast.error((err as Error).message || "Sign-in failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,7 +116,15 @@ function AuthPage() {
               <Button variant="link" className="px-0" onClick={() => { setSent(null); setMode("in"); }}>Back to sign in</Button>
             </div>
           ) : (
-            <form onSubmit={submit} className="mt-6 space-y-4">
+            <>
+            {mode !== "forgot" && (
+              <div className="mt-6 space-y-2">
+                <Button type="button" variant="outline" className="w-full" disabled={busy} onClick={() => social("google")}>Continue with Google</Button>
+                <Button type="button" variant="outline" className="w-full" disabled={busy} onClick={() => social("microsoft")}>Continue with Microsoft</Button>
+                <p className="pt-2 text-center text-xs text-muted-foreground">or with email</p>
+              </div>
+            )}
+            <form onSubmit={submit} className="mt-4 space-y-4">
               {mode === "up" && (
                 <div className="space-y-2"><Label htmlFor="name">Full name</Label>
                   <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required /></div>
@@ -126,6 +149,7 @@ function AuthPage() {
                 )}
               </div>
             </form>
+            </>
           )}
         </div>
       </div>
