@@ -130,10 +130,6 @@ export const runDueNow = createServerFn({ method: "POST" })
     return runDue(admin);
   });
 
-const replySchema = {
-  type: "object", additionalProperties: false, required: ["classification", "summary"],
-  properties: { classification: { type: "string", enum: ["interested", "meeting_request", "question", "not_now", "not_interested", "unsubscribe", "out_of_office", "referral", "other"] }, summary: { type: "string" } },
-};
 export const SQL_CLASSES = ["interested", "meeting_request"];
 
 export const logReply = createServerFn({ method: "POST" })
@@ -147,51 +143,7 @@ export const logReply = createServerFn({ method: "POST" })
     const { data: cl0 } = await a0.from("campaign_leads").select("campaign_id").eq("id", data.campaignLeadId).single();
     if (!cl0) throw new Error("Lead not found");
     const { admin, campaign } = await assertEdit(context.supabase, cl0.campaign_id);
-    const { data: cl } = await admin.from("campaign_leads").select("id,status,lead:leads(*)").eq("id", data.campaignLeadId).single();
-    const alreadySql = cl?.status === "sql";
-    const l = cl!.lead as unknown as Record<string, string | null>;
-    const { getLlmConfig, llmJson } = await import("./llm.server");
-    const cfg = await getLlmConfig(campaign.workspace_id, "scoring");
-    const out = await llmJson<{ classification: string; summary: string }>(cfg,
-      "Classify a prospect's reply to B2B outreach. interested = wants to learn more; meeting_request = proposes or accepts a meeting; not_now = timing; unsubscribe = asks to stop/remove. summary: one sentence.",
-      data.body, "reply_class", replySchema);
-    const isSql = SQL_CLASSES.includes(out.classification);
-    let freshsalesId: string | null = null, crmError: string | null = null;
-    // Stop the sequence for this lead.
-    await admin.from("messages").update({ status: "skipped", error: "Lead replied" }).eq("campaign_lead_id", cl!.id).in("status", ["scheduled", "waiting", "approved", "draft"]);
-    const leadStatus = out.classification === "unsubscribe" ? "unsubscribed" : isSql || alreadySql ? "sql" : "replied";
-    await admin.from("campaign_leads").update({ status: leadStatus }).eq("id", cl!.id);
-    if (out.classification === "unsubscribe" && l["email"])
-      await admin.from("suppression_list").insert({ workspace_id: campaign.workspace_id, value: l["email"].toLowerCase(), kind: "email", reason: "Unsubscribed via reply", created_by: context.userId });
-    const { integration, slackAlert } = await import("./sequence.server");
-    if (isSql && alreadySql) crmError = "Already an SQL — not pushed to Freshsales again";
-    if (isSql && !alreadySql) {
-      const fs = await integration(admin, campaign.workspace_id, "freshsales");
-      if (!fs) crmError = "Freshsales not connected";
-      else {
-        try {
-          const custom: Record<string, string> = {};
-          const { data: ag } = await admin.from("agents").select("name").eq("id", campaign.agent_id).single();
-          const { data: org } = await admin.from("organizations").select("name").eq("id", campaign.organization_id).single();
-          const ours: Record<string, string> = { agent: ag?.name ?? "", brand: org?.name ?? "", campaign: campaign.name, reply_summary: out.summary };
-          for (const pair of (fs.config["map_custom_fields"] ?? "").split(",")) { const [k, v] = pair.split("=").map((x) => x.trim()); if (k && v && ours[k] !== undefined) custom[v] = ours[k]!; }
-          const contact: Record<string, unknown> = { first_name: l["first_name"], last_name: l["last_name"] || l["company"] || "Unknown", email: l["email"], job_title: l["title"],
-            lead_source_id: undefined, external_id: l["apollo_id"] ?? undefined, ...(fs.config["map_owner_id"] ? { owner_id: Number(fs.config["map_owner_id"]) } : {}), ...(Object.keys(custom).length ? { custom_field: custom } : {}) };
-          const domain = fs.config["domain"]!.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-          const r = await fetch(`https://${domain}/crm/sales/api/contacts`, { method: "POST", headers: { Authorization: `Token token=${fs.secret}`, "Content-Type": "application/json" }, body: JSON.stringify({ contact }) });
-          const t = await r.text();
-          if (!r.ok) crmError = `Freshsales [${r.status}]: ${t.slice(0, 200)}`;
-          else freshsalesId = String((JSON.parse(t) as { contact?: { id?: number } }).contact?.id ?? "");
-        } catch (e) { crmError = e instanceof Error ? e.message : "Freshsales push failed"; }
-      }
-      await slackAlert(admin, campaign.workspace_id, `:fire: New SQL — ${l["first_name"] ?? ""} ${l["last_name"] ?? ""} (${l["title"] ?? ""}, ${l["company"] ?? ""}) replied to "${campaign.name}": ${out.summary}`);
-    }
-    await admin.from("replies").insert({ workspace_id: campaign.workspace_id, campaign_id: campaign.id, campaign_lead_id: cl!.id, channel: data.channel, body: data.body,
-      classification: out.classification, summary: out.summary.slice(0, 500), is_sql: isSql, freshsales_id: freshsalesId, crm_error: crmError, created_by: context.userId });
-    const { fireWebhooks } = await import("./sequence.server");
-    const hook = { campaign: { id: campaign.id, name: campaign.name }, lead: { email: l["email"], first_name: l["first_name"], last_name: l["last_name"], company: l["company"], title: l["title"] },
-      channel: data.channel, classification: out.classification, summary: out.summary, freshsales_id: freshsalesId };
-    await fireWebhooks(admin, campaign.workspace_id, "reply.received", hook);
-    if (isSql && !alreadySql) await fireWebhooks(admin, campaign.workspace_id, "sql.created", hook);
-    return { classification: out.classification, isSql, crmError };
+    void campaign;
+    const { processReply } = await import("./sequence.server");
+    return processReply(admin, { campaignLeadId: data.campaignLeadId, body: data.body, channel: data.channel, createdBy: context.userId });
   });

@@ -31,6 +31,7 @@ import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrganizationsIndexRouteImport } from './routes/_authenticated/organizations.index'
 import { Route as AuthenticatedOrganizationsOrgIdRouteImport } from './routes/_authenticated/organizations.$orgId'
 import { Route as ApiPublicSequenceTickRouteImport } from './routes/api/public/sequence-tick'
+import { Route as ApiPublicVapiWebhookRouteImport } from './routes/api/public/vapi-webhook'
 import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
 
 const IndexRoute = IndexRouteImport.update({
@@ -151,6 +152,11 @@ const ApiPublicSequenceTickRoute = ApiPublicSequenceTickRouteImport.update({
   path: '/api/public/sequence-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVapiWebhookRoute = ApiPublicVapiWebhookRouteImport.update({
+  id: '/api/public/vapi-webhook',
+  path: '/api/public/vapi-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicV1LeadsRoute = ApiPublicV1LeadsRouteImport.update({
   id: '/api/public/v1/leads',
   path: '/api/public/v1/leads',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
+  '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/agents/': typeof AuthenticatedAgentsIndexRoute
   '/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/organizations/': typeof AuthenticatedOrganizationsIndexRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
+  '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/agents': typeof AuthenticatedAgentsIndexRoute
   '/campaigns': typeof AuthenticatedCampaignsIndexRoute
   '/organizations': typeof AuthenticatedOrganizationsIndexRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/_authenticated/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/_authenticated/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
+  '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/_authenticated/agents/': typeof AuthenticatedAgentsIndexRoute
   '/_authenticated/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/_authenticated/organizations/': typeof AuthenticatedOrganizationsIndexRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/campaigns/new'
     | '/organizations/$orgId'
     | '/api/public/sequence-tick'
+    | '/api/public/vapi-webhook'
     | '/agents/'
     | '/campaigns/'
     | '/organizations/'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/campaigns/new'
     | '/organizations/$orgId'
     | '/api/public/sequence-tick'
+    | '/api/public/vapi-webhook'
     | '/agents'
     | '/campaigns'
     | '/organizations'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campaigns/new'
     | '/_authenticated/organizations/$orgId'
     | '/api/public/sequence-tick'
+    | '/api/public/vapi-webhook'
     | '/_authenticated/agents/'
     | '/_authenticated/campaigns/'
     | '/_authenticated/organizations/'
@@ -307,6 +319,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicSequenceTickRoute: typeof ApiPublicSequenceTickRoute
+  ApiPublicVapiWebhookRoute: typeof ApiPublicVapiWebhookRoute
   ApiPublicV1LeadsRoute: typeof ApiPublicV1LeadsRoute
 }
 
@@ -466,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSequenceTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/vapi-webhook': {
+      id: '/api/public/vapi-webhook'
+      path: '/api/public/vapi-webhook'
+      fullPath: '/api/public/vapi-webhook'
+      preLoaderRoute: typeof ApiPublicVapiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/leads': {
       id: '/api/public/v1/leads'
       path: '/api/public/v1/leads'
@@ -559,6 +579,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicSequenceTickRoute: ApiPublicSequenceTickRoute,
+  ApiPublicVapiWebhookRoute: ApiPublicVapiWebhookRoute,
   ApiPublicV1LeadsRoute: ApiPublicV1LeadsRoute,
 }
 export const routeTree = rootRouteImport
