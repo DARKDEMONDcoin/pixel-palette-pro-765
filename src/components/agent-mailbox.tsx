@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { startMailboxConnect, completeMailboxConnect, getMailboxStatus, disconnectAgentMailbox } from "@/lib/mailbox.functions";
 
-export function AgentMailbox({ agentId, workspaceId }: { agentId?: string; workspaceId: string }) {
+export function AgentMailbox({ agentId, workspaceId }: { agentId?: string | undefined; workspaceId: string }) {
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const start = useServerFn(startMailboxConnect), complete = useServerFn(completeMailboxConnect), status = useServerFn(getMailboxStatus), unlink = useServerFn(disconnectAgentMailbox);
