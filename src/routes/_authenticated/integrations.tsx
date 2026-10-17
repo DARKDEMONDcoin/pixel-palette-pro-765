@@ -13,7 +13,7 @@ import { useWorkspace } from "@/lib/workspace";
 import { saveIntegration, disconnectIntegration, type Provider } from "@/lib/integrations.functions";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
-  head: () => ({ meta: [{ title: "Integrations — Outreach AI" }, { name: "description", content: "Connect Apollo, mailboxes, LinkedIn, calls, CRM and Slack." }] }),
+  head: () => ({ meta: [{ title: "Integrations — Outreach AI" }, { name: "description", content: "Connect Apollo, mailboxes, LinkedIn, calls, CRM and Slack." }, { property: "og:title", content: "Integrations — Outreach AI" }, { property: "og:description", content: "Manage your workspace connections and agent mailboxes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: IntegrationsPage,
 });
 
@@ -67,7 +67,8 @@ function IntegrationsPage() {
     queryKey: ["integrations", ws],
     enabled: !!ws,
     queryFn: async () => {
-      const { data, error } = await supabase.from("integrations").select("provider,status,config,last_tested_at,last_error").eq("workspace_id", ws!);
+      if (!ws) return [];
+      const { data, error } = await supabase.from("integrations").select("provider,status,config,last_tested_at,last_error").eq("workspace_id", ws);
       if (error) throw error;
       return data as unknown as Row[];
     },
@@ -80,7 +81,7 @@ function IntegrationsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         {defs.map((d) => <IntegrationCard key={d.id} def={d} ws={ws} row={q.data?.find((r) => r.provider === d.id)} canEdit={isAdmin} />)}
         <StaticCard icon={Mail} name="Mailboxes (Gmail / Outlook)" desc="Each agent sends from its own mailbox.">
-          Mailbox sign-in needs a Google / Microsoft app set up for your workspace first. <Link to="/agents" className="text-primary underline">Go to agents</Link>
+          <Link to="/agents" className="text-primary underline">Manage agent mailboxes</Link>
         </StaticCard>
         <StaticCard icon={Sheet} name="Google Sheets" desc="Import leads from and export reports to Sheets.">Not connected — Google sign-in needs a Google app set up for your workspace (same one used for Gmail).</StaticCard>
       </div>

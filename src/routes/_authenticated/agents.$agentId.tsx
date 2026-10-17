@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/lib/workspace";
 
 export const Route = createFileRoute("/_authenticated/agents/$agentId")({
-  head: () => ({ meta: [{ title: "Agent — Outreach AI" }, { name: "description", content: "Agent performance and settings." }] }),
+  head: () => ({ meta: [{ title: "Agent — Outreach AI" }, { name: "description", content: "Agent performance and settings." }, { property: "og:title", content: "Agent — Outreach AI" }, { property: "og:description", content: "Manage your agent and securely connect its mailbox." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AgentDetail,
 });
 

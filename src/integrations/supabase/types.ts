@@ -14,6 +14,46 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_mailboxes: {
+        Row: {
+          agent_id: string
+          connection_id: string
+          workspace_id: string
+        }
+        Insert: {
+          agent_id: string
+          connection_id: string
+          workspace_id: string
+        }
+        Update: {
+          agent_id?: string
+          connection_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_mailboxes_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_mailboxes_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "app_user_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_mailboxes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           avatar_path: string | null
@@ -165,6 +205,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "api_keys_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_user_connections: {
+        Row: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          email: string
+          id: string
+          reconnect_required: boolean
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          email: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_user_connections_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -673,6 +757,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mailbox_oauth_attempts: {
+        Row: {
+          agent_id: string
+          connector_id: string
+          expires_at: string
+          id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          agent_id: string
+          connector_id: string
+          expires_at?: string
+          id?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          agent_id?: string
+          connector_id?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mailbox_oauth_attempts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mailbox_oauth_attempts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"

@@ -30,6 +30,7 @@ import { Route as AuthenticatedCampaignsCampaignIdRouteImport } from './routes/_
 import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authenticated/campaigns.new'
 import { Route as AuthenticatedOrganizationsIndexRouteImport } from './routes/_authenticated/organizations.index'
 import { Route as AuthenticatedOrganizationsOrgIdRouteImport } from './routes/_authenticated/organizations.$orgId'
+import { Route as ApiPublicMailboxReturnRouteImport } from './routes/api/public/mailbox-return'
 import { Route as ApiPublicSequenceTickRouteImport } from './routes/api/public/sequence-tick'
 import { Route as ApiPublicVapiWebhookRouteImport } from './routes/api/public/vapi-webhook'
 import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
@@ -147,6 +148,11 @@ const AuthenticatedOrganizationsOrgIdRoute =
     path: '/$orgId',
     getParentRoute: () => AuthenticatedOrganizationsRoute,
   } as any)
+const ApiPublicMailboxReturnRoute = ApiPublicMailboxReturnRouteImport.update({
+  id: '/api/public/mailbox-return',
+  path: '/api/public/mailbox-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSequenceTickRoute = ApiPublicSequenceTickRouteImport.update({
   id: '/api/public/sequence-tick',
   path: '/api/public/sequence-tick',
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/mailbox-return': typeof ApiPublicMailboxReturnRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/agents/': typeof AuthenticatedAgentsIndexRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/mailbox-return': typeof ApiPublicMailboxReturnRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/agents': typeof AuthenticatedAgentsIndexRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/_authenticated/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/_authenticated/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/_authenticated/organizations/$orgId': typeof AuthenticatedOrganizationsOrgIdRoute
+  '/api/public/mailbox-return': typeof ApiPublicMailboxReturnRoute
   '/api/public/sequence-tick': typeof ApiPublicSequenceTickRoute
   '/api/public/vapi-webhook': typeof ApiPublicVapiWebhookRoute
   '/_authenticated/agents/': typeof AuthenticatedAgentsIndexRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/organizations/$orgId'
+    | '/api/public/mailbox-return'
     | '/api/public/sequence-tick'
     | '/api/public/vapi-webhook'
     | '/agents/'
@@ -279,6 +289,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/organizations/$orgId'
+    | '/api/public/mailbox-return'
     | '/api/public/sequence-tick'
     | '/api/public/vapi-webhook'
     | '/agents'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campaigns/$campaignId'
     | '/_authenticated/campaigns/new'
     | '/_authenticated/organizations/$orgId'
+    | '/api/public/mailbox-return'
     | '/api/public/sequence-tick'
     | '/api/public/vapi-webhook'
     | '/_authenticated/agents/'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicMailboxReturnRoute: typeof ApiPublicMailboxReturnRoute
   ApiPublicSequenceTickRoute: typeof ApiPublicSequenceTickRoute
   ApiPublicVapiWebhookRoute: typeof ApiPublicVapiWebhookRoute
   ApiPublicV1LeadsRoute: typeof ApiPublicV1LeadsRoute
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrganizationsOrgIdRouteImport
       parentRoute: typeof AuthenticatedOrganizationsRoute
     }
+    '/api/public/mailbox-return': {
+      id: '/api/public/mailbox-return'
+      path: '/api/public/mailbox-return'
+      fullPath: '/api/public/mailbox-return'
+      preLoaderRoute: typeof ApiPublicMailboxReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sequence-tick': {
       id: '/api/public/sequence-tick'
       path: '/api/public/sequence-tick'
@@ -578,6 +598,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicMailboxReturnRoute: ApiPublicMailboxReturnRoute,
   ApiPublicSequenceTickRoute: ApiPublicSequenceTickRoute,
   ApiPublicVapiWebhookRoute: ApiPublicVapiWebhookRoute,
   ApiPublicV1LeadsRoute: ApiPublicV1LeadsRoute,
