@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
+import { AgentMailbox } from "@/components/agent-mailbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,7 +55,7 @@ function Section({ title, description, children }: { title: string; description?
 
 export function AgentForm({ initial, onSaved }: { initial?: AgentRow; onSaved: (id: string) => void }) {
   const { current, user } = useWorkspace();
-  const ws = current!.workspace_id;
+  const ws = current?.workspace_id ?? "";
   const orgs = useQuery({
     queryKey: ["orgs-min", ws],
     queryFn: async () => {
@@ -123,7 +124,7 @@ export function AgentForm({ initial, onSaved }: { initial?: AgentRow; onSaved: (
       icp_company_sizes: list(f.icp_company_sizes),
       icp_titles: list(f.icp_titles),
       icp_seniorities: list(f.icp_seniorities),
-      mailbox_provider: f.mailbox_provider || null,
+      ...(initial ? {} : { mailbox_provider: f.mailbox_provider || null }),
       daily_send_cap: f.daily_send_cap,
       send_days: [...f.send_days].sort(),
       send_start_hour: f.send_start_hour,
@@ -198,20 +199,7 @@ export function AgentForm({ initial, onSaved }: { initial?: AgentRow; onSaved: (
       </Section>
 
       <Section title="Mailbox" description="The inbox this agent sends from.">
-        <div className="space-y-1.5">
-          <Label>Provider</Label>
-          <Select value={f.mailbox_provider} onValueChange={(v) => upd("mailbox_provider", v)}>
-            <SelectTrigger><SelectValue placeholder="Choose Gmail or Outlook" /></SelectTrigger>
-            <SelectContent><SelectItem value="gmail">Gmail / Google Workspace</SelectItem><SelectItem value="outlook">Outlook / Microsoft 365</SelectItem></SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-start gap-3 rounded-xl bg-secondary p-4 text-sm">
-          <Mail className="mt-0.5 size-4 text-primary" />
-          <div>
-            <div className="font-medium">{initial?.mailbox_status === "connected" ? `Connected: ${initial.mailbox_email}` : "Not connected"}</div>
-            <p className="text-muted-foreground">Mailbox sign-in becomes available once your workspace's Google / Microsoft app is set up. Sending steps are skipped until then.</p>
-          </div>
-        </div>
+        <AgentMailbox agentId={initial?.id} workspaceId={ws} />
       </Section>
 
       <Section title="Sending rules" description="Protect deliverability and respect working hours.">

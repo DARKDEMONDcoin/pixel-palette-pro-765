@@ -15,7 +15,7 @@ function localParts(tz: string, d: Date) {
   return { day: String(parts["weekday"]).toLowerCase().slice(0, 3), hour: Number(parts["hour"]) % 24 };
 }
 
-type Agent = { id: string; status: string; mailbox_status: string; daily_send_cap: number; send_days: string[]; send_start_hour: number; send_end_hour: number; send_timezone: string; warmup_enabled: boolean; warmup_start_cap: number; warmup_increment: number; created_at: string };
+type Agent = { id: string; workspace_id: string; status: string; mailbox_status: string; daily_send_cap: number; send_days: number[]; send_start_hour: number; send_end_hour: number; send_timezone: string; warmup_enabled: boolean; warmup_start_cap: number; warmup_increment: number; created_at: string };
 
 function capFor(a: Agent) {
   if (!a.warmup_enabled) return a.daily_send_cap;
@@ -44,7 +44,7 @@ export async function runDue(admin: Admin, limit = 50) {
     if (c.status !== "active") { out.deferred++; continue; }
     if (cl.status !== "active") { await admin.from("messages").update({ status: "skipped", error: `Lead ${cl.status}` }).eq("id", m.id); continue; }
     if (!agents.has(c.agent_id)) {
-      const { data: a } = await admin.from("agents").select("*").eq("id", c.agent_id).maybeSingle();
+      const { data: a } = await admin.from("agents").select("*").eq("id", c.agent_id).eq("workspace_id", m.workspace_id).maybeSingle();
       agents.set(c.agent_id, a as Agent | null);
       const start = new Date(now); start.setUTCHours(0, 0, 0, 0);
       const { data: campIds } = await admin.from("campaigns").select("id").eq("agent_id", c.agent_id);
@@ -52,16 +52,21 @@ export async function runDue(admin: Admin, limit = 50) {
       sentToday.set(c.agent_id, count ?? 0);
     }
     const a = agents.get(c.agent_id);
-    if (!a || a.status !== "active") { out.deferred++; continue; }
+    if (!a || a.workspace_id !== m.workspace_id || a.status !== "active") { out.deferred++; continue; }
     const lp = localParts(a.send_timezone || "UTC", now);
-    if (!a.send_days.includes(lp.day) || lp.hour < a.send_start_hour || lp.hour >= a.send_end_hour) { out.deferred++; continue; }
+    if (!a.send_days.includes(["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(lp.day)) || lp.hour < a.send_start_hour || lp.hour >= a.send_end_hour) { out.deferred++; continue; }
     if ((sentToday.get(c.agent_id) ?? 0) >= capFor(a)) { out.deferred++; continue; }
     const l = cl.lead;
     let error: string | null = null, waiting = false;
     try {
       if (m.channel === "email") {
         if (a.mailbox_status !== "connected") { waiting = true; error = "Agent mailbox not connected"; }
-        else { waiting = true; error = "Mailbox sending not available yet"; }
+        else if (!l["email"]) error = "Lead has no email address";
+        else {
+          const { sendAgentEmail } = await import("./mailbox-send.server");
+          const result = await sendAgentEmail(admin, { workspaceId: m.workspace_id, agentId: a.id, to: l["email"], subject: m.subject ?? "", body: m.body });
+          waiting = result.waiting; error = result.error;
+        }
       } else if (m.channel === "linkedin") {
         const p = await integration(admin, m.workspace_id, "phantombuster");
         if (!p) { waiting = true; error = "Phantombuster not connected"; }

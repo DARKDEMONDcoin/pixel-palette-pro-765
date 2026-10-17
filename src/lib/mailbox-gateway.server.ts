@@ -27,7 +27,8 @@ export async function checkedJson(response: Response): Promise<Record<string, an
     console.error(`Mailbox provider failed [${response.status}]: ${text}`);
     throw new Error(`Mailbox provider failed [${response.status}]: ${text}`);
   }
-  return response.status === 204 ? {} : response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 }
 export async function mailboxProfile(connector: string, apiKey: string, key: string) {
   const profile = await checkedJson(await gatewayRequest(connector === "google_mail" ? "/google_mail/gmail/v1/users/me/profile" : "/microsoft_outlook/me?$select=mail,userPrincipalName", apiKey, key, undefined, scopesFor(connector)));

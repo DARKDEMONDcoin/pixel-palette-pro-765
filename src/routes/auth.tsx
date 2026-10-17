@@ -7,6 +7,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeAuthDestination } from "@/lib/mailbox-rules";
 
 type Search = { redirect?: string | undefined };
 
@@ -20,19 +21,15 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Sign in to your AI SDR workspace." },
       { property: "og:title", content: "Sign in — Outreach AI" },
       { property: "og:description", content: "Sign in to your AI SDR workspace." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
 });
 
 function safePath(p?: string) {
-  if (!p) return "/dashboard";
-  try {
-    const u = new URL(p, window.location.origin);
-    return u.origin === window.location.origin ? u.pathname + u.search : "/dashboard";
-  } catch {
-    return "/dashboard";
-  }
+  return safeAuthDestination(p, window.location.origin);
 }
 
 function AuthPage() {
@@ -46,14 +43,22 @@ function AuthPage() {
   const [sent, setSent] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: safePath(redirect) as "/dashboard" });
+    const finish = () => {
+      const destination = safePath(redirect ?? sessionStorage.getItem("auth:destination") ?? undefined);
+      sessionStorage.removeItem("auth:destination");
+      navigate({ to: destination as "/dashboard" });
+    };
+    supabase.auth.getUser().then(({ data }) => { if (data.user) finish(); });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) finish();
     });
-  }, []);
+    return () => listener.subscription.unsubscribe();
+  }, [redirect, navigate]);
 
   async function social(provider: "google" | "microsoft") {
     setBusy(true);
     try {
+      sessionStorage.setItem("auth:destination", safePath(redirect));
       const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/auth" });
       if (r.error) throw r.error;
       if (r.redirected) return;
@@ -76,7 +81,7 @@ function AuthPage() {
       } else if (mode === "up") {
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: window.location.origin + "/dashboard", data: { full_name: name } },
+          options: { emailRedirectTo: window.location.origin + "/auth", data: { full_name: name } },
         });
         if (error) throw error;
         setSent("Check your inbox to confirm your email, then sign in.");
