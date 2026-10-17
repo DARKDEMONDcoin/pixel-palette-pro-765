@@ -3,7 +3,8 @@
 - [x] Phase 1 — Auth, workspaces, roles, layout, design
 - [x] Phase 2 — Organizations, documents, RAG, brand summary
 - [x] Phase 3 — Agents (form, list, detail, sending rules)
-- [ ] Phase 3b — Real Gmail/Outlook mailbox sign-in per agent — blocked: workspace Google/Microsoft OAuth app (App User Connector client) not configured
+- [ ] Phase 3b — Google/Microsoft clients linked; implement secure user mailbox consent and agent assignment
+- [ ] Verify Google/Microsoft account creation and mailbox linking (provider consent requires the account owner)
 - [x] Phase 4 — Integrations page (Apollo, Freshsales, Slack tests)
 - [ ] Phase 4b — LinkedIn and calling providers — blocked: provider not chosen
 - [x] Phase 5 — Campaign wizard steps 1–4 (basics, sources, qualification, research)
