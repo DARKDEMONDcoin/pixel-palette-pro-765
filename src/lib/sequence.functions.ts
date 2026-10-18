@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 
 export type StepInput = { channel: "email" | "linkedin" | "call"; delay_days: number; instructions: string };
 type Rpc = (fn: string, args: object) => Promise<{ data: unknown; error: unknown }>;
@@ -7,7 +7,7 @@ type Rpc = (fn: string, args: object) => Promise<{ data: unknown; error: unknown
 async function assertEdit(supabase: unknown, campaignId: string) {
   const { data, error } = await (supabase as { rpc: Rpc }).rpc("can_edit_campaign", { _c: campaignId });
   if (error || data !== true) throw new Error("You can't edit this campaign");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/integrations/external/client.server");
   const { data: c } = await supabaseAdmin.from("campaigns").select("*").eq("id", campaignId).single();
   if (!c) throw new Error("Campaign not found");
   return { admin: supabaseAdmin, campaign: c };
@@ -139,7 +139,7 @@ export const logReply = createServerFn({ method: "POST" })
     return { campaignLeadId: d.campaignLeadId, body: d.body.trim().slice(0, 8000), channel: ["email", "linkedin", "call"].includes(d.channel) ? d.channel : "email" };
   })
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin: a0 } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin: a0 } = await import("@/integrations/external/client.server");
     const { data: cl0 } = await a0.from("campaign_leads").select("campaign_id").eq("id", data.campaignLeadId).single();
     if (!cl0) throw new Error("Lead not found");
     const { admin, campaign } = await assertEdit(context.supabase, cl0.campaign_id);

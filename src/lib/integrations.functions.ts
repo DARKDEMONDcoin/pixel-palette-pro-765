@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 
 export type Provider = "apollo" | "freshsales" | "slack" | "llm" | "phantombuster" | "vapi";
 const PROVIDERS: Provider[] = ["apollo", "freshsales", "slack", "llm", "phantombuster", "vapi"];
@@ -68,7 +68,7 @@ export const saveIntegration = createServerFn({ method: "POST" })
   .inputValidator(validate)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase as never, data.workspaceId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/external/client.server");
     const { data: existing } = await supabaseAdmin.from("integrations").select("id").eq("workspace_id", data.workspaceId).eq("provider", data.provider).maybeSingle();
     let secret = data.secret;
     if (!secret && existing) {
@@ -102,7 +102,7 @@ export const disconnectIntegration = createServerFn({ method: "POST" })
   .inputValidator(validate)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase as never, data.workspaceId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/external/client.server");
     await supabaseAdmin.from("integrations").delete().eq("workspace_id", data.workspaceId).eq("provider", data.provider);
     return { ok: true };
   });

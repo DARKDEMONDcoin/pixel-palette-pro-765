@@ -1,5 +1,5 @@
 // Server-only sequence engine: sends due messages through the right channel provider.
-type Admin = (typeof import("@/integrations/supabase/client.server"))["supabaseAdmin"];
+type Admin = (typeof import("@/integrations/external/client.server"))["supabaseAdmin"];
 
 export async function integration(admin: Admin, ws: string, provider: string) {
   const { data: row } = await admin.from("integrations").select("id,status,config").eq("workspace_id", ws).eq("provider", provider).maybeSingle();

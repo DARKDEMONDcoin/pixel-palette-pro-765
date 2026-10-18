@@ -44,7 +44,7 @@ export const Route = createFileRoute("/api/public/vapi-webhook")({
         const transcript = (msg.artifact?.transcript ?? msg.transcript ?? "").trim();
         const summary = (msg.analysis?.summary ?? msg.summary ?? "").trim();
         const recording = msg.artifact?.recordingUrl ?? msg.recordingUrl ?? "";
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { supabaseAdmin } = await import("@/integrations/external/client.server");
 
         // Record the call outcome on the outbound message.
         if (messageId && z.string().uuid().safeParse(messageId).success)

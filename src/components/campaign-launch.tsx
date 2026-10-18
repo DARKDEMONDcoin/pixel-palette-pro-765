@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { useWorkspace } from "@/lib/workspace";
 import { saveSteps, generateCopy, launchCampaign, setCampaignStatus, runDueNow, logReply, type StepInput } from "@/lib/sequence.functions";
 import type { Campaign } from "@/components/campaign-wizard";

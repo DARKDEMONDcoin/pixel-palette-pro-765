@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/public/v1/leads")({
       GET: async ({ request }) => {
         const key = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
         if (!key) return Response.json({ error: "Missing API key" }, { status: 401 });
-        const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+        const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
         const { data: k } = await admin.from("api_keys").select("id,workspace_id,revoked_at").eq("key_hash", await sha256(key)).maybeSingle();
         if (!k || k.revoked_at) return Response.json({ error: "Invalid API key" }, { status: 401 });
         await admin.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", k.id);

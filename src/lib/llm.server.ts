@@ -7,7 +7,7 @@ type LlmConfig = { provider: string; model: string; key: string | null };
 const DEFAULTS = { research: "openai/gpt-6-astra", scoring: "openai/gpt-6-luna" };
 
 export async function getLlmConfig(workspaceId: string, kind: LlmKind): Promise<LlmConfig> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/integrations/external/client.server");
   const { data: row } = await supabaseAdmin.from("integrations").select("id,status,config").eq("workspace_id", workspaceId).eq("provider", "llm").maybeSingle();
   const cfg = (row?.status === "connected" ? row.config : {}) as Record<string, string>;
   const provider = cfg["provider"] || "lovable";

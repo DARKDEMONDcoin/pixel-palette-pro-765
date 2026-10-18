@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 
 export type Stats = { leads: number; qualified: number; sent: number; email: number; linkedin: number; call: number; replies: number; interested: number; sqls: number; unsub: number };
 const empty = (): Stats => ({ leads: 0, qualified: 0, sent: 0, email: 0, linkedin: 0, call: 0, replies: 0, interested: 0, sqls: 0, unsub: 0 });

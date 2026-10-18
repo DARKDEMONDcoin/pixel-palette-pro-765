@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { useWorkspace } from "@/lib/workspace";
 import { LeadTimeline } from "@/components/lead-timeline";
 

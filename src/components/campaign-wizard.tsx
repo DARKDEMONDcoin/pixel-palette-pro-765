@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { useWorkspace } from "@/lib/workspace";
 import { importLeads, apolloPreview, apolloImport, qualifyLeads, researchLeads, LEAD_FIELDS, type LeadInput, type ApolloFilters, type ResearchProfile } from "@/lib/campaigns.functions";
 

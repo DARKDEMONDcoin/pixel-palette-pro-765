@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgentAvatar, AgentForm, DAYS } from "@/components/agent-form";
 import { MailboxChip, StatusChip } from "./agents.index";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { useWorkspace } from "@/lib/workspace";
 
 export const Route = createFileRoute("/_authenticated/agents/$agentId")({

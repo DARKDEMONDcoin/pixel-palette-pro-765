@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { roleLabel, useWorkspace } from "@/lib/workspace";
 import { NotificationBell } from "@/components/notification-bell";
 

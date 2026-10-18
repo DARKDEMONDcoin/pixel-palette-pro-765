@@ -2,8 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/external/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,10 +58,11 @@ function AuthPage() {
     setBusy(true);
     try {
       sessionStorage.setItem("auth:destination", safePath(redirect));
-      const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/auth" });
-      if (r.error) throw r.error;
-      if (r.redirected) return;
-      navigate({ to: safePath(redirect) as "/dashboard" });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === "microsoft" ? "azure" : "google",
+        options: provider === "microsoft" ? { redirectTo: window.location.origin + "/auth", scopes: "email" } : { redirectTo: window.location.origin + "/auth" },
+      });
+      if (error) throw error;
     } catch (err) {
       toast.error((err as Error).message || "Sign-in failed");
     } finally {

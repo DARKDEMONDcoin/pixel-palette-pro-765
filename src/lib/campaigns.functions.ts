@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 
 export type LeadInput = {
   email?: string | undefined; first_name?: string | undefined; last_name?: string | undefined; title?: string | undefined;
@@ -16,7 +16,7 @@ type Rpc = (fn: string, args: object) => Promise<{ data: unknown; error: unknown
 async function assertEdit(supabase: unknown, campaignId: string) {
   const { data, error } = await ((supabase as { rpc: Rpc }).rpc)("can_edit_campaign", { _c: campaignId });
   if (error || data !== true) throw new Error("You can't edit this campaign");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/integrations/external/client.server");
   const { data: c } = await supabaseAdmin.from("campaigns").select("*").eq("id", campaignId).single();
   if (!c) throw new Error("Campaign not found");
   return { admin: supabaseAdmin, campaign: c };

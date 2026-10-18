@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 import { canManageMailbox, connectorFor } from "./mailbox-rules";
 const agentInput = z.object({ agentId: z.string().uuid(), workspaceId: z.string().uuid() });
 
-type UserClient = (typeof import("@/integrations/supabase/client"))["supabase"];
+type UserClient = (typeof import("@/integrations/external/client"))["supabase"];
 async function authorizeAgent(client: UserClient, userId: string, data: { agentId: string; workspaceId: string }) {
   const { data: member, error: memberError } = await client.from("workspace_members").select("role").eq("workspace_id", data.workspaceId).eq("user_id", userId).eq("active", true).maybeSingle();
   const { data: agent, error } = await client.from("agents").select("id,created_by,workspace_id,mailbox_email,mailbox_provider,mailbox_status").eq("id", data.agentId).eq("workspace_id", data.workspaceId).maybeSingle();
@@ -14,7 +14,7 @@ async function authorizeAgent(client: UserClient, userId: string, data: { agentI
 }
 export const getMailboxStatus = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(input => agentInput.parse(input)).handler(async ({ data, context }) => {
   const agent = await authorizeAgent(context.supabase, context.userId, data);
-  const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
   const { data: binding, error } = await admin.from("agent_mailboxes").select("connection:app_user_connections(user_id,reconnect_required)").eq("agent_id", data.agentId).eq("workspace_id", data.workspaceId).maybeSingle();
   if (error) throw error;
   return { email: agent.mailbox_email, provider: agent.mailbox_provider, connected: !!binding && agent.mailbox_status === "connected", reconnectRequired: binding?.connection?.reconnect_required ?? false, ownedByYou: binding?.connection?.user_id === context.userId,
@@ -25,7 +25,7 @@ export const startMailboxConnect = createServerFn({ method: "POST" }).middleware
   const apiKey = process.env['LOVABLE_API_KEY'], cryptoSecret = process.env['APP_USER_CONNECTION_KEY_SECRET'];
   const clientKey = data.provider === "gmail" ? process.env['GOOGLE_MAIL_APP_USER_CONNECTOR_CLIENT_API_KEY'] : process.env['MICROSOFT_OUTLOOK_APP_USER_CONNECTOR_CLIENT_API_KEY'];
   if (!apiKey || !cryptoSecret || !clientKey) throw new Error("Mailbox provider is not configured for this app yet");
-  const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
   const { gatewayRequest, checkedJson, decryptKey, scopesFor } = await import("./mailbox-gateway.server");
   const connector = connectorFor(data.provider);
   const { data: old, error: oldError } = await admin.from("app_user_connections").select("connection_key_ciphertext").eq("workspace_id", data.workspaceId).eq("user_id", context.userId).eq("connector_id", connector).maybeSingle();
@@ -44,7 +44,7 @@ export const completeMailboxConnect = createServerFn({ method: "POST" }).middlew
   await authorizeAgent(context.supabase, context.userId, data);
   const apiKey = process.env['LOVABLE_API_KEY'], secret = process.env['APP_USER_CONNECTION_KEY_SECRET'];
   if (!apiKey || !secret) throw new Error("Mailbox provider is not configured");
-  const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
   const { data: attempt, error } = await admin.from("mailbox_oauth_attempts").delete().eq("id", data.attemptId).eq("user_id", context.userId).eq("workspace_id", data.workspaceId).eq("agent_id", data.agentId).gt("expires_at", new Date().toISOString()).select("connector_id").maybeSingle();
   if (error || !attempt) throw new Error("Mailbox consent expired; please reconnect");
   const { gatewayRequest, checkedJson, encryptKey, mailboxProfile } = await import("./mailbox-gateway.server");
@@ -63,7 +63,7 @@ export const completeMailboxConnect = createServerFn({ method: "POST" }).middlew
 });
 export const disconnectAgentMailbox = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(input => agentInput.parse(input)).handler(async ({ data, context }) => {
   await authorizeAgent(context.supabase, context.userId, data);
-  const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
   const { error } = await admin.from("agent_mailboxes").delete().eq("workspace_id", data.workspaceId).eq("agent_id", data.agentId);
   if (error) throw error;
   const { error: updateError } = await admin.from("agents").update({ mailbox_status: "not_connected", mailbox_email: null, mailbox_provider: null }).eq("id", data.agentId).eq("workspace_id", data.workspaceId);
