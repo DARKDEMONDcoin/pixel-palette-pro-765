@@ -60,7 +60,7 @@ function AuthPage() {
       sessionStorage.setItem("auth:destination", safePath(redirect));
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider === "microsoft" ? "azure" : "google",
-        options: { redirectTo: window.location.origin + "/auth", scopes: provider === "microsoft" ? "email" : undefined },
+        options: provider === "microsoft" ? { redirectTo: window.location.origin + "/auth", scopes: "email" } : { redirectTo: window.location.origin + "/auth" },
       });
       if (error) throw error;
     } catch (err) {
