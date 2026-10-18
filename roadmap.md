@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Current audit — signed-in navigation, organization/document CRUD, agent settings, campaign workflow, leads, inbox, analytics, integrations and settings; fix reproduced defects and run regression tests
+
 - [x] Phase 1 — Auth, workspaces, roles, layout, design
 - [x] Phase 2 — Organizations, documents, RAG, brand summary
 - [x] Phase 3 — Agents (form, list, detail, sending rules)
