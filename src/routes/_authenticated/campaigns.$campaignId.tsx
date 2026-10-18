@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { BasicsForm, SourceStep, QualificationStep, ResearchStep, STEPS, type Campaign } from "@/components/campaign-wizard";
 import { CampaignStatus } from "./campaigns.index";
 import { SequenceStep, CopyStep, ApprovalStep, LaunchStep } from "@/components/campaign-launch";

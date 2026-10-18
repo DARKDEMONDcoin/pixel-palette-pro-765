@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Bot, Building2, CheckCircle2, Circle, FileUp, Mail, Megaphone } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { useWorkspace } from "@/lib/workspace";
 import { pct, useAnalytics } from "@/lib/analytics";
 

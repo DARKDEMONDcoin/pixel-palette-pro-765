@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { ChannelChip } from "@/components/campaign-launch";
 
 type Item = { at: string; kind: "message" | "reply"; channel: string; title: string; body: string; meta: string; campaign: string };

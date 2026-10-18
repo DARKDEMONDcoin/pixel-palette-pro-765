@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 
 type Rpc = (fn: string, args: object) => Promise<{ data: unknown; error: unknown }>;
 
@@ -14,7 +14,7 @@ export const gdprDelete = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: ok } = await (context.supabase as unknown as { rpc: Rpc }).rpc("has_ws_role", { _ws: data.workspaceId, _role: "super_admin" });
     if (ok !== true) throw new Error("Only Super Admins can do this");
-    const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin: admin } = await import("@/integrations/external/client.server");
     const { data: leads } = await admin.from("leads").select("id").eq("workspace_id", data.workspaceId).ilike("email", data.email);
     const ids = (leads ?? []).map((l) => l.id);
     if (ids.length) {

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/external/auth-middleware";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const EMBED_MODEL = "google/gemini-embedding-2";
